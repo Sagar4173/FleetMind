@@ -1,0 +1,8 @@
+extends: baseline.yaml
+generation:
+  customer_sites: 750
+  orders: 4000
+  vehicles: 150
+  drivers: 150
+routing:
+  time_limit_seconds: 15

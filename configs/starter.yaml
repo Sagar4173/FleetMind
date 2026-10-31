@@ -1,0 +1,13 @@
+extends: baseline.yaml
+horizon:
+  start_date: 2026-11-02
+  days: 7
+generation:
+  customer_sites: 40
+  orders: 120
+  vehicles: 12
+  drivers: 12
+routing:
+  time_limit_seconds: 5
+anomaly:
+  instances_per_type: 2

@@ -1,0 +1,30 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+.ruff_cache/
+.mypy_cache/
+
+# Generated data / run artifacts
+data/processed/
+data/quarantine/
+data/anomaly_workspace/
+outputs/
+*.duckdb
+*.duckdb.wal
+*.log
+
+# Streamlit
+.streamlit/secrets.toml
+__pycache__/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
