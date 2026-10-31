@@ -1730,12 +1730,12 @@ class DataQualityValidator:
 
 
 def validate_master(
-    tables: dict[str, pd.DataFrame], config: AppConfig
+    tables: dict[str, pd.DataFrame], config: AppConfig, prefix: str = "DQ"
 ) -> ValidationResult:
-    return DataQualityValidator(config).validate_master(tables)
+    return DataQualityValidator(config).validate_master(tables, prefix=prefix)
 
 
 def validate_full(
-    tables: dict[str, pd.DataFrame], config: AppConfig
+    tables: dict[str, pd.DataFrame], config: AppConfig, prefix: str = "DQ"
 ) -> ValidationResult:
-    return DataQualityValidator(config).validate_full(tables)
+    return DataQualityValidator(config).validate_full(tables, prefix=prefix)

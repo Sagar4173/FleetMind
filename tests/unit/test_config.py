@@ -79,3 +79,29 @@ def test_generation_mix_defaults_cover_every_priority() -> None:
     config = load_config("configs/baseline.yaml")
     assert sum(config.generation.priority_mix.values()) == pytest.approx(1.0)
     assert sum(config.generation.fleet_mix.values()) == pytest.approx(1.0)
+
+
+def test_extends_cycle_is_rejected(tmp_path) -> None:
+    (tmp_path / "a.yaml").write_text("extends: b.yaml\n", encoding="utf-8")
+    (tmp_path / "b.yaml").write_text("extends: a.yaml\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="extends cycle"):
+        load_config(tmp_path / "a.yaml")
+
+
+def test_missing_config_reports_path() -> None:
+    with pytest.raises(FileNotFoundError, match="does-not-exist.yaml"):
+        load_config("does-not-exist.yaml")
+
+
+def test_unknown_config_keys_are_rejected() -> None:
+    with pytest.raises(ValidationError, match="Extra inputs"):
+        load_config_dict({"generation": {"customer_sites": 10, "mystery": 1}})
+
+
+def test_yaml_round_trip_preserves_hash(tmp_path) -> None:
+    config = load_config("configs/starter.yaml")
+    path = tmp_path / "round-trip.yaml"
+    config.to_yaml(path)
+    reloaded = load_config(path)
+    assert reloaded.config_hash() == config.config_hash()
+    assert reloaded.run_id == config.run_id
