@@ -282,6 +282,9 @@ def benchmark_command(
     for column in ("config", "generate_s", "plan_s", "simulate_s", "validate_s", "total_s", "peak_rss_mb"):
         table.add_column(column, justify="right")
     for item in report["results"]:
+        if item.get("status") == "FAILED":
+            table.add_row(str(item["config"]), "-", "-", "-", "-", "-", "-")
+            continue
         table.add_row(
             str(item["config"]),
             f"{item['stages']['generate']:.2f}",
@@ -289,7 +292,7 @@ def benchmark_command(
             f"{item['stages']['simulate']:.2f}",
             f"{item['stages']['validate_clean']:.2f}",
             f"{item['stages']['total']:.2f}",
-            f"{item['peak_rss_mb']:.1f}",
+            f"{item['memory']['peak_rss_mb']:.1f}",
         )
     console.print(table)
     console.print(f"Reports written under [bold]{output}[/bold]")

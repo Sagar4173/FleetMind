@@ -1,0 +1,2 @@
+run_id,depot_id,name,address_line,city,state,postal_code,latitude,longitude,open_minute,close_minute,active
+RUN-C16424724715,DEP-001,FleetMind Dallas Depot,1400 Logistics Parkway,Dallas,TX,75201,32.7767,-96.797,360,1320,True

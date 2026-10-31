@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from fleetmind.cli import app
@@ -48,6 +49,30 @@ def test_cli_run_and_runs_listing(tiny_pipeline, tmp_path) -> None:
     listing = runner.invoke(app, ["runs", "--database", str(database)])
     assert listing.exit_code == 0, listing.output
     assert tiny_pipeline.config.run_id in listing.output
+
+
+@pytest.mark.integration
+def test_cli_benchmark_renders_peak_memory(tiny_pipeline, tmp_path) -> None:
+    config_path = tmp_path / "tiny.yaml"
+    tiny_pipeline.config.to_yaml(config_path)
+    output = tmp_path / "benchmarks"
+    result = runner.invoke(
+        app,
+        [
+            "benchmark",
+            "--configs",
+            str(config_path),
+            "--output",
+            str(output),
+            "--database",
+            str(tmp_path / "warehouse.duckdb"),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert "Benchmark results" in result.output
+    assert "Reports written under" in result.output
+    report = (output / "benchmark_report.json").read_text(encoding="utf-8")
+    assert '"peak_rss_mb"' in report
 
 
 def test_cli_rejects_unknown_artifact_format(tiny_pipeline, tmp_path) -> None:

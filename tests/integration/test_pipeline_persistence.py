@@ -28,6 +28,7 @@ def test_tiny_pipeline_is_clean_and_fully_evaluated(tiny_pipeline) -> None:
     expected = {item.value for item in AnomalyType}
     assert set(run.anomaly_evaluation.counts_by_type) == expected
     assert set(run.anomaly_evaluation.counts_by_type.values()) == {1}
+    assert expected <= set(run.dirty_validation.counts_by_type())
     assert len(run.quarantine_records) + len(run.dirty_quarantine_records) > 0
 
 

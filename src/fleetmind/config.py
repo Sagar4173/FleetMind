@@ -265,6 +265,8 @@ def load_config(path: Path | str) -> AppConfig:
     resolved = Path(path)
     if not resolved.is_absolute() and not resolved.exists():
         resolved = CONFIG_DIR / resolved
+        if not resolved.exists() and not resolved.suffix:
+            resolved = resolved.with_suffix(".yaml")
     payload = _read_yaml_with_extends(resolved.resolve())
     payload.setdefault("dataset_version", DATASET_VERSION)
     return AppConfig.model_validate(payload)

@@ -1,0 +1,114 @@
+# Assumptions
+
+This document records modelling and engineering assumptions that materially affect FleetMind's behaviour. They are
+intentional, testable choices, not hidden defaults.
+
+## Geography
+
+- The service region is a rectangle defined by `region.min_lat`, `region.max_lat`, `region.min_lon`, and
+  `region.max_lon`. The baseline uses a DFW Metro envelope.
+- Sites are sampled around a small number of configured clusters with a spread parameter, then clipped to the region.
+  The depot is a configured point inside the envelope.
+- Travel distance is Haversine distance multiplied by a fixed road-network factor. It is not road-network routing and
+  does not account for one-way streets, turn restrictions, bridges, or live closures.
+- Travel time is distance divided by an assumed road speed. A static model keeps the synthetic data reproducible and
+  makes the travel trace auditable.
+
+## Calendar and time
+
+- Generation starts on `2026-11-02` (the configured `horizon.start_date`) and spans `horizon.days` consecutive days.
+- All timestamps are naive local times in the synthetic region. There is no daylight-saving transition inside the
+  baseline horizon.
+- A service day is planned independently. A vehicle or driver can appear on multiple days, but there is no multi-day
+  route continuity, overnight route, or handover model.
+- Time windows are hard for planning. The `grace_minutes` field is retained on the record; execution uses the
+  configured `simulation.late_grace_minutes` and `reporting.on_time_grace_minutes` for lateness and on-time scoring.
+
+## Demand
+
+- Each order produces exactly one delivery. Cancellations and split shipments are not modelled.
+- Demand attributes are sampled from configured categorical mixes. The mixes must sum to 1.0 and cover every enum
+  value where required.
+- `demand_units` is the primary capacity unit. Weight capacity is enforced independently. Volume is stored but is not
+  a hard routing constraint in this version.
+- Handling class determines the required vehicle equipment. Refrigerated demand additionally requires a driver with
+  a `COLD_CHAIN` certification. Bulk demand at a site without a dock requires lift-gate equipment and certification.
+- Site access class restricts vehicle type: `VAN_ONLY` accepts only cargo vans, `MEDIUM` excludes flatbeds, and
+  `ALL` accepts any eligible vehicle.
+
+## Fleet and drivers
+
+- Vehicles and drivers are active or inactive; only active resources with a scheduled shift on the service date are
+  candidates.
+- One vehicle and one driver are paired per shift. A vehicle cannot have two shifts on the same date; neither can a
+  driver.
+- Shift eligibility reserves both `break_minutes` and `routing.execution_buffer_minutes` before the shift end.
+- A vehicle's `max_route_duration_min` further caps the effective shift window.
+- Driver license class must exactly match the vehicle's required license class. The generator creates matching
+  pairings; validation flags mismatches.
+- Driver hourly cost is stored but is not part of the routing objective. The objective uses distance, fixed vehicle
+  cost, and unserved penalties.
+
+## Planning
+
+- Planning is per service date and uses the day's scenario multiplier on the static travel matrix.
+- The objective minimizes distance (`distance_weight`), fixed vehicle cost, and priority-weighted unserved penalties.
+  It does not optimize fuel, overtime, or driver cost directly.
+- `allow_dropping=true` permits OR-Tools to leave a delivery unserved when serving it would cost more than the
+  disjunction penalty. The planner then records an explicit `UNSERVED` assignment and reason.
+- Priority multipliers scale the unserved penalty: `LOW=0.7`, `STANDARD=1.0`, `HIGH=1.6`, `URGENT=2.5`.
+- The solver is given a wall-clock limit per day (`routing.time_limit_seconds`). If a time-limited solve returns a
+  feasible assignment, the planner keeps it and records the solver outcome. If it returns no assignment, deliveries
+  are marked unserved with a solver timeout reason.
+- If the solver returns no usable assignment, deliveries are marked unserved rather than violating a constraint.
+- The planner defensively re-checks unit and weight capacity after extraction and raises `RoutingError` if an
+  OR-Tools solution violates either. This is a fail-closed design.
+
+## Execution simulation
+
+- Dispatch delay is drawn uniformly from `[0, dispatch_delay_max_minutes]` per route.
+- Travel time varies per leg by a factor in `1 ± travel_variance_pct`. Distance is unchanged.
+- Service duration varies by `1 ± service_variance_pct`.
+- Service cannot start before the planned service start; early arrival becomes waiting time. This preserves the
+  customer window and avoids inventing early service.
+- A stop fails with `CUSTOMER_UNAVAILABLE` on a deterministic draw below the configured base rate.
+- A stop fails with `LATE_ARRIVAL` when actual service starts after the hard window end plus
+  `simulation.late_grace_minutes`.
+- On-time status compares service start to the window end plus `reporting.on_time_grace_minutes`.
+- Proof-of-delivery identifiers are generated when `simulation.proof_of_delivery=true`.
+- All draws are derived from `(seed, route_id, stop_id, purpose)` style labels, so execution is reproducible even
+  though it uses randomness.
+
+## Anomalies
+
+- Exactly `anomaly.instances_per_type` instances of each of the six classes are injected. If the clean snapshot does
+  not contain enough suitable candidates, injection raises rather than injecting fewer.
+- Injected routes are disjoint where practical, but cascading validation issues are allowed and expected.
+- Ground truth is a separate table and is never passed to a detector.
+- Detectors are rule-based and limited to the six specified classes. They are not trained models and do not generalize
+  to arbitrary anomalies.
+- Evaluation matches on exact `(issue_type, entity_id)`. A detector that finds the right problem on a different
+  entity is a false positive and a false negative.
+- The dirty snapshot is not repaired. It exists to demonstrate detection and validation, not to be a cleansed output.
+
+## Data quality and persistence
+
+- Clean validation failures are terminal for the run status but do not suppress evidence. This is deliberate: a
+  failed run must be diagnosable.
+- Record-level structural problems are quarantined; semantic plan/execution problems are flagged but not removed.
+- The warehouse is a snapshot store, not a slowly changing dimension. Each run replaces the previous snapshot for the
+  same configuration hash.
+- Logical checksums cover canonical CSV content. Parquet bytes, compression settings, file timestamps, and wall-clock
+  audit times are outside the logical contract.
+- The dashboard is read-only and assumes the schema generated by this repository. It is not a general BI tool.
+
+## Performance and scale
+
+- Baseline and larger measurements are single cold runs on the documented machine. They are evidence for this
+  environment, not a performance guarantee.
+- OR-Tools time limits dominate planning wall time. Generation, simulation, validation, and persistence are small by
+  comparison at the tested scales.
+- The travel matrix grows quadratically with site count (`(sites + 1)^2`). The larger configuration generates 564,001
+  rows. Much larger site counts would require a sparse or on-demand matrix.
+- Peak RSS roughly doubles from baseline to larger in the measured runs (445.9 MB to 859.7 MB). Memory headroom on a
+  small machine should be validated before scaling beyond the provided configs.

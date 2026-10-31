@@ -88,6 +88,12 @@ def test_extends_cycle_is_rejected(tmp_path) -> None:
         load_config(tmp_path / "a.yaml")
 
 
+def test_bare_config_name_resolves_under_configs() -> None:
+    config = load_config("starter")
+    assert config.generation.customer_sites == 40
+    assert config.run_id == load_config("configs/starter.yaml").run_id
+
+
 def test_missing_config_reports_path() -> None:
     with pytest.raises(FileNotFoundError, match="does-not-exist.yaml"):
         load_config("does-not-exist.yaml")

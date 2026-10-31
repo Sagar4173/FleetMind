@@ -1,0 +1,84 @@
+project: FleetMind
+seed: 20261022
+dataset_version: 1.0.0
+region:
+  name: DFW Metro
+  center_lat: 32.7767
+  center_lon: -96.797
+  min_lat: 32.55
+  max_lat: 33.05
+  min_lon: -97.15
+  max_lon: -96.45
+  depot_id: DEP-001
+  depot_name: FleetMind Dallas Depot
+  depot_lat: 32.7767
+  depot_lon: -96.797
+  state: TX
+  cities:
+  - Dallas
+  - Fort Worth
+  - Arlington
+  - Plano
+  - Irving
+  - Garland
+  - Frisco
+  - Richardson
+  clusters: 7
+  cluster_spread_km: 11.0
+horizon:
+  start_date: '2026-11-02'
+  days: 7
+generation:
+  customer_sites: 40
+  orders: 120
+  vehicles: 12
+  drivers: 12
+  site_active_ratio: 0.97
+  shift_availability_weekday: 0.92
+  shift_availability_weekend: 0.62
+  depot_ready_time: 06:30
+  order_lead_days_min: 1
+  order_lead_days_max: 5
+  priority_mix:
+    LOW: 0.15
+    STANDARD: 0.55
+    HIGH: 0.23
+    URGENT: 0.07
+  handling_mix:
+    AMBIENT: 0.62
+    REFRIGERATED: 0.14
+    FRAGILE: 0.16
+    BULK: 0.08
+  fleet_mix:
+    CARGO_VAN: 0.45
+    BOX_TRUCK: 0.35
+    REFRIGERATED_TRUCK: 0.12
+    FLATBED: 0.08
+routing:
+  time_limit_seconds: 5
+  workers: 1
+  max_stops_per_route: 14
+  fixed_vehicle_cost: 80000
+  unserved_penalty: 5000000
+  distance_weight: 1.0
+  execution_buffer_minutes: 30
+  priority_multipliers:
+    LOW: 0.7
+    STANDARD: 1.0
+    HIGH: 1.6
+    URGENT: 2.5
+  allow_dropping: true
+simulation:
+  dispatch_delay_max_minutes: 8
+  travel_variance_pct: 0.06
+  service_variance_pct: 0.15
+  late_grace_minutes: 15
+  failed_attempt_service_minutes: 8
+  customer_unavailable_base_rate: 0.006
+  proof_of_delivery: true
+anomaly:
+  instances_per_type: 2
+  coordinate_margin_degrees: 0.35
+reporting:
+  on_time_grace_minutes: 15
+  top_n: 10

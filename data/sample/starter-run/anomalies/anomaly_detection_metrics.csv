@@ -1,0 +1,7 @@
+run_id,issue_type,tp,fp,tn,fn,precision,recall,f1,evaluated_universe,notes
+RUN-C16424724715,ROUTE_CAPACITY_EXCEEDED,2,0,23,0,1.0,1.0,1.0,25,Universe = routes with a known vehicle capacity; load is recomputed from route stops and compared with the assigned vehicle capacity.
+RUN-C16424724715,STOP_OMITTED,2,0,116,0,1.0,1.0,1.0,118,Universe = deliveries whose assignment status is ASSIGNED; a detection requires the delivery to have no route stop.
+RUN-C16424724715,STOP_DUPLICATED,2,0,116,0,1.0,1.0,1.0,118,Universe = assigned deliveries plus deliveries referenced by route stops; a detection requires more than one stop for one delivery.
+RUN-C16424724715,ARRIVAL_BEFORE_PREVIOUS_DEPARTURE,2,0,89,0,1.0,1.0,1.0,91,"Universe = route stops with an actual arrival and a preceding actual departure on the same route, ordered by stop sequence."
+RUN-C16424724715,DRIVER_SHIFT_EXCEEDED,2,0,23,0,1.0,1.0,1.0,25,Universe = routes with an actual end and a resolvable shift planned end; a detection requires actual_end > planned_end.
+RUN-C16424724715,COORDINATE_OUT_OF_REGION,2,0,38,0,1.0,1.0,1.0,40,Universe = customer sites with numeric coordinates inside the global latitude/longitude ranges; the configured region bounds are applied.

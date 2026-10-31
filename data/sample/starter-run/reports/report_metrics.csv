@@ -1,0 +1,115 @@
+run_id,category,metric_name,value,unit,numerator,denominator,formula,dimensions
+RUN-C16424724715,service,delivery_service_rate,0.966667,ratio,116.0,120.0,delivered outcomes / requested deliveries,
+RUN-C16424724715,service,plan_assignment_rate,0.983333,ratio,118.0,120.0,assigned deliveries / requested deliveries,
+RUN-C16424724715,service,execution_completion_rate,0.983051,ratio,116.0,118.0,delivered outcomes / assigned deliveries,
+RUN-C16424724715,service,failure_rate,0.016949,ratio,2.0,118.0,failed outcomes / assigned deliveries,
+RUN-C16424724715,service,unserved_rate,0.016667,ratio,2.0,120.0,unserved assignments / requested deliveries,
+RUN-C16424724715,service,on_time_rate,1.0,ratio,116.0,116.0,on-time delivered outcomes / delivered outcomes,
+RUN-C16424724715,service,delivered_deliveries,116.0,count,,,,
+RUN-C16424724715,service,failed_deliveries,2.0,count,,,,
+RUN-C16424724715,service,unserved_deliveries,2.0,count,,,,
+RUN-C16424724715,service,total_deliveries,120.0,count,,,,
+RUN-C16424724715,service_priority,on_time_rate,1.0,ratio,24.0,24.0,on-time deliveries / delivered deliveries,priority=HIGH
+RUN-C16424724715,service_priority,delivery_service_rate,1.0,ratio,24.0,24.0,delivered outcomes / requested deliveries,priority=HIGH
+RUN-C16424724715,service_priority,on_time_rate,1.0,ratio,19.0,19.0,on-time deliveries / delivered deliveries,priority=LOW
+RUN-C16424724715,service_priority,delivery_service_rate,0.904762,ratio,19.0,21.0,delivered outcomes / requested deliveries,priority=LOW
+RUN-C16424724715,service_priority,on_time_rate,1.0,ratio,65.0,65.0,on-time deliveries / delivered deliveries,priority=STANDARD
+RUN-C16424724715,service_priority,delivery_service_rate,0.970149,ratio,65.0,67.0,delivered outcomes / requested deliveries,priority=STANDARD
+RUN-C16424724715,service_priority,on_time_rate,1.0,ratio,8.0,8.0,on-time deliveries / delivered deliveries,priority=URGENT
+RUN-C16424724715,service_priority,delivery_service_rate,1.0,ratio,8.0,8.0,delivered outcomes / requested deliveries,priority=URGENT
+RUN-C16424724715,service_handling,delivery_service_rate,0.975309,ratio,79.0,81.0,delivered outcomes / requested deliveries,handling_class=AMBIENT
+RUN-C16424724715,service_handling,delivery_service_rate,1.0,ratio,12.0,12.0,delivered outcomes / requested deliveries,handling_class=BULK
+RUN-C16424724715,service_handling,delivery_service_rate,1.0,ratio,15.0,15.0,delivered outcomes / requested deliveries,handling_class=FRAGILE
+RUN-C16424724715,service_handling,delivery_service_rate,0.833333,ratio,10.0,12.0,delivered outcomes / requested deliveries,handling_class=REFRIGERATED
+RUN-C16424724715,daily,delivered_deliveries,18.0,count,,,,service_date=2026-11-02
+RUN-C16424724715,daily,failed_deliveries,0.0,count,,,,service_date=2026-11-02
+RUN-C16424724715,daily,on_time_rate,1.0,ratio,18.0,18.0,on-time deliveries / delivered deliveries,service_date=2026-11-02
+RUN-C16424724715,daily,delivered_deliveries,16.0,count,,,,service_date=2026-11-03
+RUN-C16424724715,daily,failed_deliveries,1.0,count,,,,service_date=2026-11-03
+RUN-C16424724715,daily,on_time_rate,1.0,ratio,16.0,16.0,on-time deliveries / delivered deliveries,service_date=2026-11-03
+RUN-C16424724715,daily,delivered_deliveries,17.0,count,,,,service_date=2026-11-04
+RUN-C16424724715,daily,failed_deliveries,0.0,count,,,,service_date=2026-11-04
+RUN-C16424724715,daily,on_time_rate,1.0,ratio,17.0,17.0,on-time deliveries / delivered deliveries,service_date=2026-11-04
+RUN-C16424724715,daily,delivered_deliveries,17.0,count,,,,service_date=2026-11-05
+RUN-C16424724715,daily,failed_deliveries,0.0,count,,,,service_date=2026-11-05
+RUN-C16424724715,daily,on_time_rate,1.0,ratio,17.0,17.0,on-time deliveries / delivered deliveries,service_date=2026-11-05
+RUN-C16424724715,daily,delivered_deliveries,17.0,count,,,,service_date=2026-11-06
+RUN-C16424724715,daily,failed_deliveries,0.0,count,,,,service_date=2026-11-06
+RUN-C16424724715,daily,on_time_rate,1.0,ratio,17.0,17.0,on-time deliveries / delivered deliveries,service_date=2026-11-06
+RUN-C16424724715,daily,delivered_deliveries,14.0,count,,,,service_date=2026-11-07
+RUN-C16424724715,daily,failed_deliveries,1.0,count,,,,service_date=2026-11-07
+RUN-C16424724715,daily,on_time_rate,1.0,ratio,14.0,14.0,on-time deliveries / delivered deliveries,service_date=2026-11-07
+RUN-C16424724715,daily,delivered_deliveries,17.0,count,,,,service_date=2026-11-08
+RUN-C16424724715,daily,failed_deliveries,0.0,count,,,,service_date=2026-11-08
+RUN-C16424724715,daily,on_time_rate,1.0,ratio,17.0,17.0,on-time deliveries / delivered deliveries,service_date=2026-11-08
+RUN-C16424724715,routing,route_count,25.0,count,,,,
+RUN-C16424724715,routing,stops_per_route,4.72,stops/route,118.0,25.0,route stops / routes,
+RUN-C16424724715,routing,total_distance_km,781.799,km,,,,
+RUN-C16424724715,routing,average_distance_km_per_route,31.27196,km/route,781.799,25.0,total route distance / routes,
+RUN-C16424724715,routing,total_travel_hours,29.166667,hours,,,,
+RUN-C16424724715,routing,total_service_hours,47.866667,hours,,,,
+RUN-C16424724715,routing,total_wait_hours,68.233333,hours,,,,
+RUN-C16424724715,routing,average_route_hours,5.810667,hours/route,8716.0,25.0,(travel + service + wait) / routes / 60,
+RUN-C16424724715,routing,distance_per_delivered_stop,6.625415,km/stop,781.799,118.0,total route distance / route stops,
+RUN-C16424724715,routing,capacity_utilization_units,0.580973,ratio,3939.0,6780.0,sum route load units / sum route capacity units,
+RUN-C16424724715,routing,capacity_utilization_weight,0.510745,ratio,58224.96,114000.0,sum route load weight / sum route weight capacity,
+RUN-C16424724715,routing,peak_route_capacity_utilization,0.995238,ratio,,,max(route load units / route capacity units),
+RUN-C16424724715,routing,average_route_capacity_utilization,0.640438,ratio,,,mean(route load units / route capacity units),
+RUN-C16424724715,fleet,active_vehicles,12.0,count,,,,
+RUN-C16424724715,fleet,vehicles_used,11.0,count,,,,
+RUN-C16424724715,fleet,fleet_utilization,0.916667,ratio,11.0,12.0,distinct routed vehicles / active vehicles,
+RUN-C16424724715,fleet,active_drivers,12.0,count,,,,
+RUN-C16424724715,fleet,drivers_used,11.0,count,,,,
+RUN-C16424724715,fleet,driver_utilization,0.916667,ratio,11.0,12.0,distinct routed drivers / active drivers,
+RUN-C16424724715,fleet,distance_per_delivery,6.739647,km/delivery,781.799,116.0,total route distance / delivered deliveries,
+RUN-C16424724715,reliability,routes_with_shift_overrun,0.0,count,,,,
+RUN-C16424724715,reliability,shift_overrun_minutes,0.0,minutes,,,,
+RUN-C16424724715,reliability,planned_shifts,64.0,count,,,,
+RUN-C16424724715,fleet_type,route_count,8.0,count,,,,vehicle_type=BOX_TRUCK
+RUN-C16424724715,fleet_type,distance_km,242.649,km,,,,vehicle_type=BOX_TRUCK
+RUN-C16424724715,fleet_type,capacity_utilization_units,0.568452,ratio,1910.0,3360.0,route load units / route capacity units,vehicle_type=BOX_TRUCK
+RUN-C16424724715,fleet_type,route_count,11.0,count,,,,vehicle_type=CARGO_VAN
+RUN-C16424724715,fleet_type,distance_km,327.114,km,,,,vehicle_type=CARGO_VAN
+RUN-C16424724715,fleet_type,capacity_utilization_units,0.786364,ratio,1038.0,1320.0,route load units / route capacity units,vehicle_type=CARGO_VAN
+RUN-C16424724715,fleet_type,route_count,1.0,count,,,,vehicle_type=FLATBED
+RUN-C16424724715,fleet_type,distance_km,19.676,km,,,,vehicle_type=FLATBED
+RUN-C16424724715,fleet_type,capacity_utilization_units,0.49,ratio,294.0,600.0,route load units / route capacity units,vehicle_type=FLATBED
+RUN-C16424724715,fleet_type,route_count,5.0,count,,,,vehicle_type=REFRIGERATED_TRUCK
+RUN-C16424724715,fleet_type,distance_km,192.36,km,,,,vehicle_type=REFRIGERATED_TRUCK
+RUN-C16424724715,fleet_type,capacity_utilization_units,0.464667,ratio,697.0,1500.0,route load units / route capacity units,vehicle_type=REFRIGERATED_TRUCK
+RUN-C16424724715,site_city,delivered_deliveries,36.0,count,,,,city=Arlington
+RUN-C16424724715,site_city,delivery_service_rate,0.923077,ratio,36.0,39.0,delivered outcomes / requested deliveries,city=Arlington
+RUN-C16424724715,site_city,delivered_deliveries,11.0,count,,,,city=Dallas
+RUN-C16424724715,site_city,delivery_service_rate,1.0,ratio,11.0,11.0,delivered outcomes / requested deliveries,city=Dallas
+RUN-C16424724715,site_city,delivered_deliveries,6.0,count,,,,city=Fort Worth
+RUN-C16424724715,site_city,delivery_service_rate,1.0,ratio,6.0,6.0,delivered outcomes / requested deliveries,city=Fort Worth
+RUN-C16424724715,site_city,delivered_deliveries,9.0,count,,,,city=Frisco
+RUN-C16424724715,site_city,delivery_service_rate,1.0,ratio,9.0,9.0,delivered outcomes / requested deliveries,city=Frisco
+RUN-C16424724715,site_city,delivered_deliveries,22.0,count,,,,city=Garland
+RUN-C16424724715,site_city,delivery_service_rate,1.0,ratio,22.0,22.0,delivered outcomes / requested deliveries,city=Garland
+RUN-C16424724715,site_city,delivered_deliveries,24.0,count,,,,city=Irving
+RUN-C16424724715,site_city,delivery_service_rate,1.0,ratio,24.0,24.0,delivered outcomes / requested deliveries,city=Irving
+RUN-C16424724715,site_city,delivered_deliveries,3.0,count,,,,city=Plano
+RUN-C16424724715,site_city,delivery_service_rate,1.0,ratio,3.0,3.0,delivered outcomes / requested deliveries,city=Plano
+RUN-C16424724715,site_city,delivered_deliveries,5.0,count,,,,city=Richardson
+RUN-C16424724715,site_city,delivery_service_rate,0.833333,ratio,5.0,6.0,delivered outcomes / requested deliveries,city=Richardson
+RUN-C16424724715,top_site,delivered_deliveries,8.0,count,,,,site_id=CUS-000028
+RUN-C16424724715,top_site,delivered_deliveries,7.0,count,,,,site_id=CUS-000031
+RUN-C16424724715,top_site,delivered_deliveries,6.0,count,,,,site_id=CUS-000023
+RUN-C16424724715,top_site,delivered_deliveries,6.0,count,,,,site_id=CUS-000029
+RUN-C16424724715,top_site,delivered_deliveries,5.0,count,,,,site_id=CUS-000033
+RUN-C16424724715,top_site,delivered_deliveries,5.0,count,,,,site_id=CUS-000002
+RUN-C16424724715,top_site,delivered_deliveries,5.0,count,,,,site_id=CUS-000008
+RUN-C16424724715,top_site,delivered_deliveries,5.0,count,,,,site_id=CUS-000024
+RUN-C16424724715,top_site,delivered_deliveries,5.0,count,,,,site_id=CUS-000034
+RUN-C16424724715,top_site,delivered_deliveries,5.0,count,,,,site_id=CUS-000014
+RUN-C16424724715,top_route,distance_km,59.178,km,,,,route_id=RTE-2026-000017
+RUN-C16424724715,top_route,distance_km,54.934,km,,,,route_id=RTE-2026-000019
+RUN-C16424724715,top_route,distance_km,54.672,km,,,,route_id=RTE-2026-000003
+RUN-C16424724715,top_route,distance_km,54.411,km,,,,route_id=RTE-2026-000014
+RUN-C16424724715,top_route,distance_km,53.225,km,,,,route_id=RTE-2026-000011
+RUN-C16424724715,top_route,distance_km,50.878,km,,,,route_id=RTE-2026-000023
+RUN-C16424724715,top_route,distance_km,48.746,km,,,,route_id=RTE-2026-000022
+RUN-C16424724715,top_route,distance_km,42.432,km,,,,route_id=RTE-2026-000013
+RUN-C16424724715,top_route,distance_km,41.721,km,,,,route_id=RTE-2026-000004
+RUN-C16424724715,top_route,distance_km,32.384,km,,,,route_id=RTE-2026-000007

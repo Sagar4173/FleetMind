@@ -235,9 +235,20 @@ def _canonical_frame(frame: pd.DataFrame) -> pd.DataFrame:
     return work
 
 
+VOLATILE_CHECKSUM_COLUMNS = frozenset({"solve_seconds"})
+
+
 def logical_checksum(frame: pd.DataFrame) -> str:
-    """Stable content hash independent of parquet metadata or row order."""
-    canonical = _canonical_frame(frame)
+    """Stable content hash independent of parquet metadata, row order, or wall time.
+
+    ``solve_seconds`` is a measured wall-clock value, not business data. Excluding it
+    keeps checksums comparable across reruns whose solver search ends a few
+    milliseconds apart.
+    """
+    work = frame.drop(
+        columns=[column for column in VOLATILE_CHECKSUM_COLUMNS if column in frame.columns]
+    )
+    canonical = _canonical_frame(work)
     text = canonical.to_csv(index=False, lineterminator="\n", float_format="%.6f")
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 

@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import re
 
+import pandas as pd
 import pytest
 
 from fleetmind.config import load_config
-from fleetmind.generation.factory import generate_dataset
+from fleetmind.generation.factory import generate_dataset, logical_checksum
 from fleetmind.models.enums import DeliveryStatus
 
 
@@ -110,6 +111,20 @@ def test_checksums_are_stable_and_complete(starter) -> None:
     assert set(dataset.checksums) == set(dataset.tables)
     assert all(re.fullmatch(r"[0-9a-f]{64}", value) for value in dataset.checksums.values())
     assert dataset.checksums["orders"] != dataset.checksums["deliveries"]
+
+
+def test_checksums_ignore_solver_wall_time() -> None:
+    frame = pd.DataFrame(
+        {
+            "route_id": ["RTE-2026-000001", "RTE-2026-000002"],
+            "distance_km": [12.5, 8.0],
+            "solve_seconds": [5.01, 5.02],
+        }
+    )
+    slower = frame.assign(solve_seconds=[5.99, 6.01])
+    assert logical_checksum(frame) == logical_checksum(slower)
+    changed = frame.assign(distance_km=[12.5, 8.5])
+    assert logical_checksum(frame) != logical_checksum(changed)
 
 
 def test_fleet_mix_and_capacity_entities(starter) -> None:

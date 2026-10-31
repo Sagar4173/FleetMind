@@ -14,7 +14,11 @@ coverage.xml
 data/processed/
 data/quarantine/
 data/anomaly_workspace/
-outputs/
+outputs/*
+!outputs/benchmarks/
+outputs/benchmarks/*
+!outputs/benchmarks/benchmark_report.json
+!outputs/benchmarks/benchmark_report.md
 *.duckdb
 *.duckdb.wal
 *.log
