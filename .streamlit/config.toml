@@ -1,0 +1,11 @@
+# FleetMind dashboard server configuration.
+#
+# The dashboard is a local, read-only control tower with no authentication.
+# It must never be exposed on a public or shared interface.  The CLI launcher
+# passes the same address explicitly so every launch path stays local-only.
+[server]
+address = "127.0.0.1"
+headless = true
+
+[browser]
+gatherUsageStats = false

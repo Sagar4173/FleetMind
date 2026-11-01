@@ -241,6 +241,8 @@ def dashboard_command(
         "streamlit",
         "run",
         str(app_path),
+        "--server.address",
+        "127.0.0.1",
         "--server.port",
         str(port),
     ]

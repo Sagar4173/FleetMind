@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -101,3 +102,32 @@ def test_cli_missing_config_returns_usage_error(tmp_path) -> None:
     )
     assert result.exit_code == 2
     assert "Configuration error" in result.output
+
+
+def test_dashboard_launcher_binds_streamlit_to_loopback(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    class CompletedProcess:
+        returncode = 0
+
+    def fake_run(command, check=False, env=None):
+        captured["command"] = command
+        captured["env"] = env
+        return CompletedProcess()
+
+    monkeypatch.setattr("fleetmind.cli.subprocess.run", fake_run)
+    result = runner.invoke(app, ["dashboard", "--port", "8765"])
+    assert result.exit_code == 0, result.output
+
+    command = captured["command"]
+    assert isinstance(command, list)
+    address = command.index("--server.address")
+    assert command[address + 1] == "127.0.0.1"
+    port = command.index("--server.port")
+    assert command[port + 1] == "8765"
+
+
+def test_project_streamlit_config_binds_loopback() -> None:
+    path = Path(__file__).resolve().parents[2] / ".streamlit" / "config.toml"
+    server = tomllib.loads(path.read_text(encoding="utf-8"))["server"]
+    assert server["address"] == "127.0.0.1"
