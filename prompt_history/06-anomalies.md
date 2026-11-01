@@ -1,5 +1,7 @@
 # 06 — Anomalies
 
+> **Supplementary normalized summary.** This file groups the work by theme for readability. It is not a verbatim transcript. The user-authored prompt text is preserved in [`verbatim/opencode-prompts.json`](verbatim/opencode-prompts.json) and the Markdown renderings under [`verbatim/opencode/`](verbatim/opencode/). Figures quoted here describe the milestone at the time it was written; the final evidence is recorded in [`../docs/verification.md`](../docs/verification.md).
+
 ## Context
 
 The clean pipeline validated successfully. The specification required six specific anomaly classes, separate ground

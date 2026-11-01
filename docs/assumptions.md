@@ -33,8 +33,9 @@ describe real people, companies, or locations.
 - Each order produces exactly one delivery. Cancellations and split shipments are not modelled.
 - Demand attributes are sampled from configured categorical mixes. The mixes must sum to 1.0 and cover every enum
   value where required.
-- `demand_units` is the primary capacity unit. Weight capacity is enforced independently. Volume is stored but is not
-  a hard routing constraint in this version.
+- `demand_units` is the primary capacity unit. Weight capacity is enforced independently. Volume is stored and
+  reported as an advisory dimension; exceeding the vehicle's `max_volume_m3` produces a `VOLUME_CAPACITY_EXCEEDED`
+  warning, not a hard routing constraint or clean-validation failure.
 - Handling class determines the required vehicle equipment. Refrigerated demand additionally requires a driver with
   a `COLD_CHAIN` certification. Bulk demand at a site without a dock requires lift-gate equipment and certification.
 - Site access class restricts vehicle type: `VAN_ONLY` accepts only cargo vans, `MEDIUM` excludes flatbeds, and

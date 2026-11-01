@@ -1,5 +1,7 @@
 # 05 — Validation and quarantine
 
+> **Supplementary normalized summary.** This file groups the work by theme for readability. It is not a verbatim transcript. The user-authored prompt text is preserved in [`verbatim/opencode-prompts.json`](verbatim/opencode-prompts.json) and the Markdown renderings under [`verbatim/opencode/`](verbatim/opencode/). Figures quoted here describe the milestone at the time it was written; the final evidence is recorded in [`../docs/verification.md`](../docs/verification.md).
+
 ## Context
 
 Generation and planning produced tables, but the platform needed an independent quality layer that could fail a run,

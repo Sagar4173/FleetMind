@@ -2,8 +2,8 @@
 
 FleetMind's benchmark suite measures the actual pipeline, not a synthetic estimate. The checked-in report at
 `outputs/benchmarks/benchmark_report.json` / `.md` is the source of truth for the numbers quoted in the README.
-The pre-remediation report from 2026-10-31 and the intermediate PyArrow 21 report from 2026-11-01 are preserved under
-`outputs/benchmarks/history/` so the earlier measurements remain auditable.
+The pre-remediation report from 2026-10-31, the intermediate PyArrow 21 report from 2026-11-01, and the pre-dwell
+report from 2026-11-01 are preserved under `outputs/benchmarks/history/` so earlier measurements remain auditable.
 
 ## Command
 
@@ -78,45 +78,46 @@ Measured 2026-11-01:
 
 | Config | Days | Sites | Orders | Vehicles | Generate (s) | Plan (s) | Simulate (s) | Reporting (s) | Validate clean (s) | Inject (s) | Detect (s) | Validate dirty (s) | Persist (s) | Total (s) |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| baseline | 30 | 500 | 2,000 | 100 | 15.68 | 310.63 | 4.81 | 0.22 | 28.56 | 5.75 | 0.69 | 31.27 | 26.74 | 503.27 |
-| larger | 30 | 750 | 4,000 | 150 | 34.18 | 481.11 | 9.22 | 0.27 | 57.60 | 12.80 | 1.27 | 61.35 | 59.05 | 886.07 |
+| baseline | 30 | 500 | 2,000 | 100 | 16.02 | 311.35 | 5.68 | 0.21 | 27.83 | 6.01 | 0.99 | 27.89 | 28.87 | 513.40 |
+| larger | 30 | 750 | 4,000 | 150 | 35.79 | 479.88 | 11.38 | 0.27 | 59.93 | 12.20 | 1.19 | 58.96 | 52.59 | 875.52 |
 
 ### Timing breakdown
 
 | Config | Planning (s) | Solver (s) | Solver s/day | Total (s) | Measured stages (s) | Finalization (s) | Unattributed (s) |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| baseline | 310.63 | 302.79 | 10.093 | 503.27 | 424.35 | 57.21 | 21.72 |
-| larger | 481.11 | 457.65 | 15.255 | 886.07 | 716.84 | 124.01 | 45.21 |
+| baseline | 311.35 | 303.32 | 10.111 | 513.40 | 424.85 | 67.03 | 21.53 |
+| larger | 479.88 | 457.52 | 15.251 | 875.52 | 712.19 | 118.85 | 44.47 |
 
 ### Memory and throughput
 
 | Config | Peak RSS (MB) | Python peak (MB) | Start RSS (MB) | Deliveries/s | Diagnostic rows/s |
 |---|---:|---:|---:|---:|---:|
-| baseline | 449.42 | 170.96 | 114.53 | 3.974 | 554.151 |
-| larger | 865.45 | 371.01 | 210.44 | 4.514 | 697.452 |
+| baseline | 454.98 | 170.95 | 114.50 | 3.896 | 543.198 |
+| larger | 856.05 | 371.03 | 213.29 | 4.569 | 705.891 |
 
 ### Quality
 
-| Config | Routes | Stops | Assigned | Delivered | Failed | Unserved | Service rate | On-time | Clean issues | Mean F1 |
+| Config | Routes | Stops | Assigned | Delivered | Failed | Unserved | Service rate | On-time | Clean warnings | Mean F1 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| baseline | 295 | 2,000 | 2,000 | 1,991 | 9 | 0 | 99.55% | 100.00% | 0 | 1.000 |
-| larger | 521 | 4,000 | 4,000 | 3,984 | 16 | 0 | 99.60% | 100.00% | 0 | 1.000 |
+| baseline | 296 | 2,000 | 2,000 | 1,991 | 9 | 0 | 99.55% | 100.00% | 43 | 1.000 |
+| larger | 522 | 4,000 | 4,000 | 3,984 | 16 | 0 | 99.60% | 100.00% | 116 | 1.000 |
 
-Both runs succeeded, passed all 15 reconciliation checks, and detected every injected anomaly with zero false
-positives and zero false negatives. The service-rate difference from 100% is due to simulated customer-unavailable
-or late failures, not unplanned demand: both runs assigned every requested delivery.
+Both runs succeeded, passed all 17 reconciliation checks, and detected every injected anomaly with zero false
+positives and zero false negatives. Clean validation had zero hard errors in both runs; the 43 and 116 clean issues are
+advisory `VOLUME_CAPACITY_EXCEEDED` warnings. The service-rate difference from 100% is due to simulated
+customer-unavailable or late failures, not unplanned demand: both runs assigned every requested delivery.
 
 ## Interpretation
 
-- Planning dominates wall time: 310.63 s of 503.27 s (61.7%) for baseline and 481.11 s of 886.07 s (54.3%) for larger.
+- Planning dominates wall time: 311.35 s of 513.40 s (60.6%) for baseline and 479.88 s of 875.52 s (54.8%) for larger.
   This is expected because both use a fixed per-day solver budget and more vehicles/sites increase model size.
-- Persisted solver seconds per day slightly exceed the YAML search limit (10.093 vs. 10 s, 15.255 vs. 15 s) because the
+- Persisted solver seconds per day slightly exceed the YAML search limit (10.111 vs. 10 s, 15.251 vs. 15 s) because the
   per-day timer also covers model construction, extraction, and OR-Tools overhead around the search itself.
-- Persistence plus finalization is the second-largest cost: 26.74 s + 57.21 s for baseline and 59.05 s + 124.01 s for
+- Persistence plus finalization is the second-largest cost: 28.87 s + 67.03 s for baseline and 52.59 s + 118.85 s for
   larger. It includes Parquet and CSV writes, DuckDB snapshot insertion, checksum computation, run metadata, summary,
   and manifest generation.
 - Peak RSS stays below 1 GB at 4,000 deliveries and 564,001 travel-matrix rows, but the larger run uses roughly twice
-  the baseline memory (449.4 MB to 865.5 MB). Treat these as measured points, not a guarantee for larger site counts.
+  the baseline memory (455.0 MB to 856.1 MB). Treat these as measured points, not a guarantee for larger site counts.
 - Single measured runs are sensitive to machine load, antivirus scanning, and solver search behavior. Re-run the
   command on the target machine before making performance decisions.
 
@@ -129,3 +130,15 @@ different feasible route set. The logical checksum excludes `solve_seconds`, so 
 change a checksum, but a genuinely different route solution does. Parquet artifacts preserve column types and can be
 used to recompute every checksum; reading the CSV files without the schema may infer different types. The suite
 intentionally does not average multiple runs or discard outliers; `repeats` is recorded as `1`.
+
+### What is reproducible, and what is not
+
+| Layer | Reproducible? | Notes |
+|---|---|---|
+| Starter generation and checked-in sample | Yes, on the verified environment | The starter config's 21 clean table checksums reproduce from the checked-in Parquet artifacts; the sample integrity test recomputes them. |
+| Benchmark aggregate KPIs | Directionally stable | Delivery counts, service rate, on-time rate, unserved count, and anomaly F1 are the appropriate comparison points. They are measured outcomes, not fixed constants. |
+| Benchmark route-level output | No, not bit-for-bit | Route IDs, stop assignments, route-dependent checksums, and some route counts can change between runs because OR-Tools search is time-limited. The 2026-11-01 pre-dwell report recorded 295 baseline and 521 larger routes; the post-remediation rerun recorded 296 and 522 with the same configurations and environment. |
+| Wall-clock timings | No | CPU load, antivirus scanning, and solver termination timing change measured seconds. |
+
+Do not claim that benchmark route outputs are bit-reproducible. Treat the checked-in report as one measured sample on
+the recorded hardware, and compare reruns by aggregate quality and throughput rather than by identical route tables.

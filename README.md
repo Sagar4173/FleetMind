@@ -39,6 +39,8 @@ or locations.
   be served is recorded as `UNSERVED` with an explicit reason instead of violating a constraint.
 - **Execution simulation.** Planned routes are executed with dispatch delays, leg-level travel variance, service
   variance, customer-unavailable failures, late-arrival handling, proof of delivery, and a complete event ledger.
+  Planned `wait_minutes` / `service_minutes` are preserved; executed dwell is published separately as
+  `actual_wait_minutes` / `actual_service_minutes` and derived from the stored execution timestamps.
 - **Data quality.** A typed rule engine validates master, plan, simulation, and lifecycle data. Invalid records are
   quarantined with the original JSON payload and a reason.
 - **Separated anomaly ground truth.** Six anomaly types are injected into a copy of the clean execution snapshot.
@@ -52,18 +54,31 @@ or locations.
 
 ## Quickstart
 
-Requires Python 3.11–3.13. OR-Tools wheels are not available for every newer Python release, so use a supported
-interpreter when creating the virtual environment.
+Requires Python 3.11-3.13. OR-Tools wheels are not available for every newer Python release, so use a supported
+interpreter when creating the virtual environment. The verified environment is Python 3.13.9. On that machine the
+`py` launcher only registered Python 3.14, so the environment was created with the 3.13 interpreter directly; use
+`py -3.13` only if your launcher lists it.
 
 ```powershell
-git clone <repository-url> FleetMind
+git clone https://github.com/Sagar4173/FleetMind.git FleetMind
 cd FleetMind
 
+# Confirm the selected interpreter is 3.11-3.13, then create the environment.
+py -3.13 --version
 py -3.13 -m venv .venv
+# If py -3.13 is unavailable, use a full path instead:
+# C:\path\to\python3.13.exe -m venv .venv
+
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-pip install -e ".[dev]"
+pip install -r requirements.lock
+pip install -e . --no-deps
+pip check
 ```
+
+`requirements.lock` pins the exact dependency versions verified on Windows 11 / Python 3.13.9, including test and
+dashboard packages. The editable install adds the `fleetmind` entry point without re-resolving dependencies. Run
+`pip check` to confirm the installed set is consistent; `docs/operations.md` documents the same procedure.
 
 Run the small starter configuration (40 sites, 120 orders, 12 vehicles, 7 days):
 
@@ -142,6 +157,13 @@ in `persist_pipeline_run` so benchmarks can time the full pipeline, and so faile
 - Run-level wall-clock fields such as `run_metadata.started_at`, `run_metadata.completed_at`, and audit timestamps
   live outside the checksummed tables. Entity `created_at` values are generated deterministically from the service
   calendar.
+- **Starter-run reproducibility.** The starter configuration is deterministic in its generated master data and
+  validation outcomes. Re-running the same starter config on the same environment reproduces the 21 clean table
+  checksums.
+- **Benchmark route-level variance.** OR-Tools search is time-limited and not bit-reproducible at the baseline and
+  larger scales. Aggregate KPIs (deliveries, service rate, anomaly F1) are stable enough to compare, but route IDs,
+  stop assignments, and route-dependent checksums can differ between benchmark runs. The checked-in benchmark report
+  records one measured run; it is not a promise of bit-identical route output.
 
 ### Constraint handling
 
@@ -149,6 +171,12 @@ Planning fails closed: every planned stop has a feasible assignment, and every r
 `delivery_assignments` row. If no eligible vehicle can serve a delivery, the assignment is `UNSERVED` with a reason
 such as `NO_ELIGIBLE_VEHICLE`, `OUTSIDE_SHIFT`, `CAPACITY_EXCEEDS_FLEET`, or `TIME_WINDOW_INFEASIBLE`. The planner
 never silently drops demand or relaxes a hard rule.
+
+**Volume is advisory, not a hard constraint.** OR-Tools enforces unit capacity, weight, shift duration, site access,
+equipment, certification, license class, time windows, and maximum route duration. `volume_m3` is generated and
+carried through the data model, but it does not constrain routing. When a route's delivery volume exceeds the
+vehicle's `max_volume_m3`, validation emits a `VOLUME_CAPACITY_EXCEEDED` **warning**; it does not fail the clean
+snapshot. This matches the documented contract and the synthetic "dock handling unit" capacity semantics.
 
 ## Outputs
 
@@ -181,8 +209,9 @@ A complete representative starter run is checked in under
 [`data/sample/starter-run`](data/sample/starter-run): all 21 checksummed tables, Parquet and CSV artifacts, the
 pre-execution master snapshot, the final simulation snapshot, anomaly and quarantine evidence, `manifest.json`, and
 `checksums.json`. The DuckDB warehouse is intentionally not committed. It contains 25 routes, 118 assigned deliveries,
-116 delivered, 2 failed, 2 unserved, and all six anomaly types detected with F1 1.0. All names, addresses, contacts,
-and coordinates are synthetic.
+116 delivered, 2 failed, 2 unserved, and all six anomaly types detected with F1 1.0. The simulation tables include both
+planned dwell (`wait_minutes`, `service_minutes`) and executed dwell (`actual_wait_minutes`,
+`actual_service_minutes`). All names, addresses, contacts, and coordinates are synthetic.
 
 ## Configuration
 
@@ -239,18 +268,25 @@ The full benchmark report is checked in at
 ignored by Git; this report is explicitly unignored as evidence. Measurements were taken on 2026-11-01 on one Windows 11
 machine with Python 3.13.9, 12 logical CPUs, 7.28 GB RAM, OR-Tools 9.15.6755, DuckDB 2.0.0, Pandas 2.3.3, and NumPy
 2.3.5. Each configuration was measured once; the configurations ran sequentially in one process with no warm-up run.
-The 2026-10-31 pre-remediation report is preserved under `outputs/benchmarks/history/`.
+The 2026-10-31 pre-remediation report and the 2026-11-01 pre-dwell report are preserved under
+`outputs/benchmarks/history/`.
 
 | Config | Sites | Orders | Vehicles | Days | Total (s) | Planning (s) | Solver (s) | Solver s/day | Peak RSS (MB) | Routes | Delivered | Service rate | F1 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| baseline | 500 | 2,000 | 100 | 30 | 503.27 | 310.63 | 302.79 | 10.093 | 449.4 | 295 | 1,991 | 99.55% | 1.000 |
-| larger | 750 | 4,000 | 150 | 30 | 886.07 | 481.11 | 457.65 | 15.255 | 865.5 | 521 | 3,984 | 99.60% | 1.000 |
+| baseline | 500 | 2,000 | 100 | 30 | 513.40 | 311.35 | 303.32 | 10.111 | 455.0 | 296 | 1,991 | 99.55% | 1.000 |
+| larger | 750 | 4,000 | 150 | 30 | 875.52 | 479.88 | 457.52 | 15.251 | 856.1 | 522 | 3,984 | 99.60% | 1.000 |
 
-Both benchmark runs passed clean validation with zero issues, assigned every requested delivery (0 unserved), and
-detected every injected anomaly with perfect precision and recall. `planning_seconds` covers deterministic pre-checks,
-per-day model construction, OR-Tools search, and result assembly. `solver_seconds` is the sum of the per-day
+Both benchmark runs passed clean validation with zero hard errors, assigned every requested delivery (0 unserved), and
+detected every injected anomaly with perfect precision and recall. They also produced 43 and 116 advisory
+`VOLUME_CAPACITY_EXCEEDED` warnings respectively; those warnings do not change the pass/fail result. All 17
+reconciliation checks passed for both runs. `planning_seconds` covers deterministic pre-checks, per-day model
+construction, OR-Tools search, and result assembly. `solver_seconds` is the sum of the per-day
 `solver_runs.solve_seconds` values actually persisted by the planner, and `solver_seconds_per_day` normalizes that by
 the 30-day horizon.
+
+The pre-dwell report recorded 295 baseline and 521 larger routes; this rerun recorded 296 and 522 with the same
+configurations and environment. That difference is expected: OR-Tools search is time-limited, so route-level output is
+not bit-reproducible even when aggregate quality is stable.
 
 Benchmark totals include artifact persistence (Parquet + CSV), DuckDB writes, both validation passes, injection,
 detection, and reporting. They are not solver-only timings. The stage-level breakdown, finalization/unattributed
@@ -262,7 +298,9 @@ timing split, and measurement method are in [`docs/benchmark_methodology.md`](do
 python -m fleetmind dashboard --database outputs/fleetmind.duckdb
 ```
 
-The Streamlit app opens on port 8501 by default. It selects the latest run from the DuckDB warehouse and provides:
+The Streamlit app listens on `127.0.0.1:8501` by default. The CLI passes `--server.address 127.0.0.1`
+explicitly, and the repository `.streamlit/config.toml` sets the same address for `streamlit run dashboard/app.py`.
+It selects the latest run from the DuckDB warehouse and provides:
 
 1. **Overview** — KPI cards, daily service/failure trend, priority and handling splits, reconciliation status.
 2. **Routing & fleet** — route table, capacity utilization, distance by vehicle type, and a Plotly route map.
@@ -270,10 +308,11 @@ The Streamlit app opens on port 8501 by default. It selects the latest run from 
 4. **Data quality** — clean/dirty issue counts by type and severity, quarantine records.
 5. **Anomalies** — ground truth vs. detections, per-type precision/recall/F1, and detection details.
 
-The dashboard is read-only; it never writes to the warehouse. It is intended for localhost use only: Streamlit binds
-to localhost by default and the app has no authentication or per-user authorization. Do not expose it on a public
-interface or point it at an untrusted database path. Set `FLEETMIND_DB` to override the default database path, or pass
-`--database` to the CLI launcher. The standalone wrapper is `dashboard/app.py`.
+The dashboard is read-only; it never writes to the warehouse. It is a local, unauthenticated tool intended for
+`127.0.0.1` only. Every shipped launch path binds to loopback, but the app has no authentication or per-user
+authorization. Do not override the bind address, expose the port through a proxy or tunnel, or point it at an
+untrusted database path. Set `FLEETMIND_DB` to override the default database path, or pass `--database` to the CLI
+launcher. The standalone wrapper is `dashboard/app.py`.
 
 ## Tests
 
@@ -310,10 +349,14 @@ Latest verification is recorded in the final commit history and in [`docs/verifi
 - One depot, one region, and one daily planning horizon per service date. Multi-depot and multi-day route continuity
   are out of scope.
 - The benchmark is a single measured run per configuration, not a statistical distribution. Absolute timings depend on
-  hardware and solver search behavior.
+  hardware and solver search behavior. Route-level outputs are not bit-reproducible across benchmark runs because
+  OR-Tools search is time-limited.
+- Volume (`volume_m3`) is advisory only. It is validated as a warning (`VOLUME_CAPACITY_EXCEEDED`) and is not a hard
+  routing constraint; weight and unit capacity are the enforced capacity dimensions.
 - Anomaly detection is rule-based and evaluated on exactly the six injected classes; it is not a general-purpose
   anomaly classifier.
 - The dashboard requires a warehouse produced by `fleetmind run` and intentionally fails gracefully when none exists.
+  It is unauthenticated and must remain bound to `127.0.0.1`; it is not a multi-user or remote-access service.
 - Credential and effective-date expiry fields are generated and stored, but planning does not filter candidates by
   expiry. Generated credentials remain valid across the provided 7- and 30-day horizons; expiry-aware eligibility is
   out of scope.

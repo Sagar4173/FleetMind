@@ -1,6 +1,6 @@
 # FleetMind benchmark report
 
-Measured: 2026-11-01T01:18:22.646424
+Measured: 2026-11-01T17:59:43.010702
 
 ## Environment
 
@@ -20,22 +20,22 @@ Measured: 2026-11-01T01:18:22.646424
 
 | Config | Days | Sites | Orders | Vehicles | Generate (s) | Plan (s) | Simulate (s) | Validate (s) | Persist (s) | Total (s) | Peak RSS (MB) |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| baseline | 30 | 500 | 2000 | 100 | 15.68 | 310.63 | 4.81 | 28.56 | 26.74 | 503.27 | 449.4 |
-| larger | 30 | 750 | 4000 | 150 | 34.18 | 481.11 | 9.22 | 57.60 | 59.05 | 886.07 | 865.5 |
+| baseline | 30 | 500 | 2000 | 100 | 16.02 | 311.35 | 5.68 | 27.83 | 28.87 | 513.40 | 455.0 |
+| larger | 30 | 750 | 4000 | 150 | 35.79 | 479.88 | 11.38 | 59.93 | 52.59 | 875.52 | 856.0 |
 
 ## Timing
 
 | Config | Planning (s) | Solver (s) | Solver s/day | Total (s) | Measured stages (s) | Finalization (s) | Unattributed (s) |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| baseline | 310.63 | 302.79 | 10.093 | 503.27 | 424.35 | 57.21 | 21.72 |
-| larger | 481.11 | 457.65 | 15.255 | 886.07 | 716.84 | 124.01 | 45.21 |
+| baseline | 311.35 | 303.32 | 10.111 | 513.40 | 424.85 | 67.03 | 21.53 |
+| larger | 479.88 | 457.52 | 15.251 | 875.52 | 712.19 | 118.85 | 44.47 |
 
 ## Quality and throughput
 
 | Config | Routes | Delivered | Service | On-time | Solver s/day | Deliveries/s | Mean anomaly F1 |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| baseline | 295 | 1991 | 99.6% | 100.0% | 10.093 | 3.97 | 1.000 |
-| larger | 521 | 3984 | 99.6% | 100.0% | 15.255 | 4.51 | 1.000 |
+| baseline | 296 | 1991 | 99.6% | 100.0% | 10.111 | 3.90 | 1.000 |
+| larger | 522 | 3984 | 99.6% | 100.0% | 15.251 | 4.57 | 1.000 |
 
 ## Method
 

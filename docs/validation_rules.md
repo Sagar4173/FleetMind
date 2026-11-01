@@ -65,13 +65,14 @@ keeps issue IDs deterministic and avoids collisions when both frames are inspect
 | Unique stop sequence | `STOP_DUPLICATED` | `CRITICAL` | `(route_id, stop_sequence)` is unique. |
 | Unit capacity | `ROUTE_CAPACITY_EXCEEDED` | `CRITICAL` | Route stop demand sum does not exceed the vehicle's unit capacity. |
 | Weight capacity | `WEIGHT_CAPACITY_EXCEEDED` | `CRITICAL` | Route stop weight sum does not exceed the vehicle's weight capacity. |
+| Volume capacity (advisory) | `VOLUME_CAPACITY_EXCEEDED` | `WARNING` | Route delivery volume exceeds the vehicle's advisory `max_volume_m3`. Does not fail clean validation. The route volume is derived from `deliveries.volume_m3`; it is not persisted as a `routes` column. |
 | Hard time windows | `TIME_WINDOW_VIOLATION` | `CRITICAL` | Planned service start lies inside the customer window. |
 | Shift containment | `DRIVER_SHIFT_EXCEEDED` | `CRITICAL` | Planned start/end lie inside the shift after reserving break and execution buffer. |
 | Stop chronology | `INVALID_DATE_ORDER` | `ERROR` | `planned_arrival <= planned_service_start <= planned_departure`. |
 | Assignment coverage | `UNASSIGNED_DELIVERY` | `CRITICAL` | Every requested delivery has an assignment. |
 | Assignment/stop coverage | `STOP_OMITTED` | `CRITICAL` | Every `ASSIGNED` delivery has a route stop; unserved deliveries do not. |
 | Outcome coverage | `INVALID_LIFECYCLE_TRANSITION` | `ERROR` | Every delivery has exactly one outcome. |
-| Route arithmetic | `ARITHMETIC_RECONCILIATION_ERROR` | `CRITICAL` | `stop_count`, loads, service, and wait totals equal stop sums. |
+| Route arithmetic | `ARITHMETIC_RECONCILIATION_ERROR` | `CRITICAL` | `stop_count`, loads, planned service/wait, and actual service/wait totals equal stop sums. |
 | Leg arithmetic | `ARITHMETIC_RECONCILIATION_ERROR` | `CRITICAL` | Route distance/travel equal leg sums. |
 | Event duplication | `DUPLICATE_EVENT` | `ERROR` | No two events share entity, type, and timestamp. |
 | Event ordering | `OUT_OF_ORDER_EVENT` | `ERROR` | Event sequences and timestamps are monotonic. |
@@ -81,7 +82,8 @@ keeps issue IDs deterministic and avoids collisions when both frames are inspect
 
 | Rule | Issue type | Severity | What it checks |
 |---|---|---|---|
-| Actual stop chronology | `INVALID_DATE_ORDER` | `ERROR` | Actual arrival → service start → departure is ordered. |
+| Actual stop chronology | `INVALID_DATE_ORDER` | `ERROR` | Actual arrival, service start, and departure are ordered. |
+| Actual dwell reconciliation | `ARITHMETIC_RECONCILIATION_ERROR` | `ERROR` | `actual_wait_minutes` and `actual_service_minutes` match the stored execution timestamps, for stops and route aggregates. |
 | Arrival after previous departure | `ARRIVAL_BEFORE_PREVIOUS_DEPARTURE` | `CRITICAL` | Within a route, a stop's actual arrival is not before the previous stop's actual departure. |
 | Actual route end after shift | `DRIVER_SHIFT_EXCEEDED` | `CRITICAL` | A completed route's actual end does not exceed the shift end (plus configured tolerance). |
 | Completed route timestamps | `INVALID_DATE_ORDER` | `ERROR` | Route actual start/end are ordered. |
@@ -130,6 +132,8 @@ bug even if validation passes, so the checks are persisted alongside KPIs.
 | `route_load_weight` | Route load weight equals stop weight sum. |
 | `route_service_minutes` | Route service minutes equal stop service sum. |
 | `route_wait_minutes` | Route wait minutes equal stop wait sum. |
+| `route_actual_service_minutes` | Route actual service minutes equal stop actual service sum. |
+| `route_actual_wait_minutes` | Route actual wait minutes equal stop actual wait sum. |
 | `route_distance` | Route distance equals planned leg distance sum. |
 | `route_travel_minutes` | Route travel equals planned leg travel sum. |
 | `route_delivered_stops` | Route delivered count equals `DELIVERED` stop rows. |
@@ -144,7 +148,7 @@ python -m fleetmind run --config starter
 
 Then inspect:
 
-- `validation/clean_issues.csv` — should be empty for a healthy run.
+- `validation/clean_issues.csv` - contains no hard errors for a healthy run. Advisory volume warnings may appear.
 - `validation/dirty_issues.csv` — expected to contain the injected classes plus cascading issues.
 - `validation/quarantine_records.csv` and `validation/dirty_quarantine_records.csv` — record-level evidence.
 - `reports/reconciliation_checks.csv` — should show every check `passed=True`.

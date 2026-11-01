@@ -16,7 +16,7 @@
     "pyarrow": "23.0.1",
     "python": "3.13.9"
   },
-  "measured_at": "2026-11-01T01:18:22.646424",
+  "measured_at": "2026-11-01T17:59:43.010702",
   "repeats": 1,
   "results": [
     {
@@ -25,28 +25,28 @@
         "run_directory": "outputs\\benchmarks\\bench-RUN-A89FE8126581\\RUN-A89FE8126581",
         "warehouse": "outputs\\benchmarks\\bench-RUN-A89FE8126581\\benchmark.duckdb"
       },
-      "benchmark_seconds": 505.3092,
+      "benchmark_seconds": 516.0326,
       "checksums": {
         "clean": {
           "customer_sites": "02491a9dcbbf600e633e42ff600c339994b260c524bf718d49c21a436d7fa30a",
           "deliveries": "ba3ee89cb78a2ab54df6f540630ab1fdb14c464b46fbd8e7a1679ab5a22d5936",
-          "delivery_assignments": "786a6993cc52641b6a7d0a3b004c7a4358d8f1d0541558ca9ec593dce867a51e",
-          "delivery_events": "006f1963a6196aa93c7f62f851f03fab3f590c460e2c078b5ea622dc458bcb23",
-          "delivery_outcomes": "0acc77a72a4ae2dfe637592fd769c15e4d28088640cf8c1fd44d5efbc020573d",
+          "delivery_assignments": "c15185974f7893ad4ade98c4351ecf464bf317726fc03c23d44a610541cb2abc",
+          "delivery_events": "b44120b65e7bc2e2c254cb68dec029a5ba18e02898f65b4e123fb11618ebbca8",
+          "delivery_outcomes": "fe441a68f0380ca09c7d60d90d75ce01a5a5b07fae2308948c953288c4f102fe",
           "depots": "bb3d7ee6e2cf21f3ed69b8c65bcaea61ea1631d5222ba4eb20bb9354c4326bc6",
           "driver_certifications": "1b1256132b28644a2cbe96c98cdb9ad45e7879f17f8530f261bfc5f75e0a4adf",
           "drivers": "e8c3a5ef5e1df6f318b918ec8d9efbc985ff22b62b7d7ee09cd6f9ad8a2b8640",
           "orders": "bd18abe2477b66c1dbd5162ed6cc2fafa95eba551eb4519d817804c725ae1137",
-          "route_events": "9847bc975eb0065f050957c65f60254be12f83f441ddde404d5993b2ee3079af",
-          "route_legs": "aa8451238d31bdd57cc3b48585dd7c6ef700f4a688da3f886539ee338f63a31e",
-          "route_stops": "77544d52e2963ab8c4cbef819f63d84702dcc29f183c3e222c4c57cd691e1a7e",
-          "routes": "e5d6cd8ea1c6074b3dcc36cf287a761912b65a666bf654295796803981bfa382",
+          "route_events": "928a290f73457dcee0ef78821c77bd5fd96bdab87944d3a01ececf9efae2bf33",
+          "route_legs": "feb082c15592d7d4dd88ddbbbab5b61420c1e6f69fd10027afaadcf4ba59e352",
+          "route_stops": "e066130a022795c29bc82924c46becde18d4aecef6c96f705c248ee7917d46f9",
+          "routes": "ba6fc85d45c39429404663499f390295d99a7bc18c4033fc9e1dda1b7c1adcb5",
           "shifts": "9803efc45cb6ecd72ce5a9f1a29fd04693a53ee99c30274341e716cc6293e93b",
-          "solver_runs": "7e9184c254b13d48b085e16c90aaa7bbc0dcf57113b4f8fb0f69fc6ad43bd9bc",
+          "solver_runs": "4f9232cb491ddb06339ba61ec8003a018a7c603806ffc426f19091c5da30db55",
           "time_windows": "572d103fee464d2da5fc14e2404eeb0012634a140480a06d87693d67350f5c1c",
           "travel_scenarios": "89c9a296630ec9bff21e82fe20a1e5078e323b73dcaf79a96d441456eaa1fb6b",
           "travel_time_matrix": "5b75214acf880ca06fb013daa276dd2feeeefa689d9b2f17886a93a7e2c15811",
-          "vehicle_capacities": "d3e70a30aaeeba13ff0d3ea98f8532c44e9df45e3d21bdc19af1fa38bb6f0f62",
+          "vehicle_capacities": "d02007b6e60ea0a482d1b35f6b05249c263721fbf02a5218219c339c64b653c0",
           "vehicle_equipment": "57f01c05fc55e8788c1ec86849228a067af0ae3775b9ecd92be2d12c5489901f",
           "vehicles": "5ba5242edfaa24533418294f8be71a22175b3196fb48754f4f61b0600fbed3c7"
         }
@@ -60,9 +60,9 @@
         "delivery_events": 10000,
         "drivers": 100,
         "orders": 2000,
-        "route_events": 8751,
+        "route_events": 8740,
         "route_stops": 2000,
-        "routes": 295,
+        "routes": 296,
         "shifts": 2143,
         "travel_matrix_rows": 251001,
         "vehicles": 100
@@ -70,20 +70,20 @@
       "days": 30,
       "error": "",
       "memory": {
-        "peak_rss_mb": 449.42,
-        "python_tracemalloc_current_mb": 51.93,
-        "python_tracemalloc_peak_mb": 170.96,
-        "start_rss_mb": 114.53
+        "peak_rss_mb": 454.98,
+        "python_tracemalloc_current_mb": 51.56,
+        "python_tracemalloc_peak_mb": 170.95,
+        "start_rss_mb": 114.5
       },
       "quality": {
         "anomaly_detection_mean_f1": 1.0,
         "anomaly_detection_min_f1": 1.0,
         "assigned_deliveries": 2000,
-        "clean_issue_count": 0,
+        "clean_issue_count": 43,
         "clean_validation_passed": true,
         "delivered_deliveries": 1991,
         "on_time_rate": 1.0,
-        "route_count": 295,
+        "route_count": 296,
         "service_rate": 0.9955,
         "unserved_deliveries": 0
       },
@@ -91,34 +91,34 @@
       "seed": 20261022,
       "solver_time_limit_seconds": 10,
       "stages": {
-        "detect_anomalies": 0.6909,
-        "generate": 15.6781,
-        "inject_anomalies": 5.7459,
-        "measured_sum": 424.3465,
-        "persist": 26.7425,
-        "plan": 310.6309,
-        "reporting": 0.2196,
-        "simulate": 4.8132,
-        "total": 503.274,
-        "validate_clean": 28.5591,
-        "validate_dirty": 31.2663
+        "detect_anomalies": 0.9935,
+        "generate": 16.018,
+        "inject_anomalies": 6.0078,
+        "measured_sum": 424.8514,
+        "persist": 28.8693,
+        "plan": 311.3495,
+        "reporting": 0.209,
+        "simulate": 5.6828,
+        "total": 513.4044,
+        "validate_clean": 27.8318,
+        "validate_dirty": 27.8897
       },
       "status": "SUCCEEDED",
       "throughput": {
-        "deliveries_per_second": 3.974,
-        "diagnostics_rows_per_second": 554.151
+        "deliveries_per_second": 3.896,
+        "diagnostics_rows_per_second": 543.198
       },
       "timing": {
-        "finalization_seconds": 57.2064,
-        "measured_stage_seconds": 424.3465,
-        "persist_stage_seconds": 26.7425,
-        "persist_total_seconds": 83.9489,
-        "planning_seconds": 310.6309,
+        "finalization_seconds": 67.0264,
+        "measured_stage_seconds": 424.8514,
+        "persist_stage_seconds": 28.8693,
+        "persist_total_seconds": 95.8957,
+        "planning_seconds": 311.3495,
         "solver_run_count": 30,
-        "solver_seconds": 302.7943,
-        "solver_seconds_per_day": 10.0931,
-        "total_seconds": 503.274,
-        "unattributed_seconds": 21.7211
+        "solver_seconds": 303.3199,
+        "solver_seconds_per_day": 10.1107,
+        "total_seconds": 513.4044,
+        "unattributed_seconds": 21.5266
       }
     },
     {
@@ -127,28 +127,28 @@
         "run_directory": "outputs\\benchmarks\\bench-RUN-2155D9A8756A\\RUN-2155D9A8756A",
         "warehouse": "outputs\\benchmarks\\bench-RUN-2155D9A8756A\\benchmark.duckdb"
       },
-      "benchmark_seconds": 890.1383,
+      "benchmark_seconds": 879.5182,
       "checksums": {
         "clean": {
           "customer_sites": "48d9011337ecf5df8e0120092fae441e86a9d71d3fe94301c63acfd99a4dd12d",
           "deliveries": "cd84781cc2f36cec3caf48d868a1d4869a34a687906b1cea7dad6da275551693",
-          "delivery_assignments": "ccf7d615dceb00d6b42a723a38273cac727cfae0c56504639117b6af7169c0de",
-          "delivery_events": "a31a1347aa6f5d85c366b17e672a70c7458b52c1aba91287652b9c4d9c61ad1f",
-          "delivery_outcomes": "b3cdac59dd074fce6c7d39772a7680208911f253ba93a8beec281cf061ad6dc4",
+          "delivery_assignments": "9b2b51e357ae118fcb2a64e6fe2dd09aef693662dd6eb3e1042e50bd38480da1",
+          "delivery_events": "8b06ff7deec720c753b354c3c2c81ee7cb16b9a22ed7a1e215a9398296e41921",
+          "delivery_outcomes": "996ee3c45d4eea8a3d701510f0e89482cfcfaafa8779b61777eecd49e6adba5a",
           "depots": "c8c3bb1b52d80c412f8114150f493d10359d89e7e7b2ffec36811d1042c2be30",
           "driver_certifications": "3adca8c6ed033fa2647ae38438f5f03cdab41875f0d54940afc639443c670979",
           "drivers": "9eae298db0a20747ab1187ee4667641b8c61351905af5a1fe385ca8d2f3c5524",
           "orders": "58ae9f74e1d652f5213d00b15defc23a1a9e38677e51b150346c26bb45d2f307",
-          "route_events": "dd47f3884635143eecb2f5438057f3edb36ba56d98d9d2b13c5f27491ee7a3d9",
-          "route_legs": "ac065a02a8d6f971db8d79531653aa0ea17f34f8c234a57d445dd9fb8aeba355",
-          "route_stops": "1c7388940685f71541a300885804f7a3277a0eca3d5efd4b987f6d885538631e",
-          "routes": "dddfd7879575237236e875fe7a58916b5c0f3f9dacf3ac272988baff44f35675",
+          "route_events": "4ca99a70fe42dbdf772fcdb2fe4b0c9f6144842a8228a72736db1cf813ed63da",
+          "route_legs": "7f70015cca7cf9439f7b38c8c59c09093b22c079a72d57cc492f6e21d1dbd9fa",
+          "route_stops": "5e71115657364889f39735dcc35fc6c4751223f84d34ee582a1f0e7dcee59694",
+          "routes": "4429d6990bf89cb9e0e5107003ac472fc185fbb7c3fc6c56b0c74327088953be",
           "shifts": "d48ba6bfbae764da916ce0d5cab0b6994e16d1a283a8b81f00a2d9d699c7a793",
-          "solver_runs": "d2202dce63cf9d8bab2f056c2152c97e9a721dca08a198079bf13ee63c608fbd",
+          "solver_runs": "6728ca41c53c58c7b71f7f1ffbe9de9d7113630f6a07fd8125cebef2cfc91f64",
           "time_windows": "d4232452e80ead05ba63b50f12e6e9408b898737fc1eb6d438f56f7608f29743",
           "travel_scenarios": "40691c675cb7f9f57c4e43b2b4bd9a3f2f882d670d1829f1b845db699de07219",
           "travel_time_matrix": "d1a20386a53ed22e509c34fe9940ac78d061865b45a442b5e44ab1694518b703",
-          "vehicle_capacities": "c9ecbfb8ed069ee585bdde61ba4e9e455626d28c973d07fcbe44c7728425c316",
+          "vehicle_capacities": "eb2a08fd686daeaa5f31e8de6fb362758e2707b02406b90fdc7507e6758d0dcf",
           "vehicle_equipment": "c472bbb7ba10f46ad223d01b0d3b834f5176fd8aa65bfa2194f8b5ce82c01591",
           "vehicles": "83154977974b923894cd8617151657a7f58fc5764eebd4c6de7a717a5eba0cb3"
         }
@@ -162,9 +162,9 @@
         "delivery_events": 20000,
         "drivers": 150,
         "orders": 4000,
-        "route_events": 16979,
+        "route_events": 17006,
         "route_stops": 4000,
-        "routes": 521,
+        "routes": 522,
         "shifts": 3440,
         "travel_matrix_rows": 564001,
         "vehicles": 150
@@ -172,20 +172,20 @@
       "days": 30,
       "error": "",
       "memory": {
-        "peak_rss_mb": 865.45,
-        "python_tracemalloc_current_mb": 106.91,
-        "python_tracemalloc_peak_mb": 371.01,
-        "start_rss_mb": 210.44
+        "peak_rss_mb": 856.05,
+        "python_tracemalloc_current_mb": 106.98,
+        "python_tracemalloc_peak_mb": 371.03,
+        "start_rss_mb": 213.29
       },
       "quality": {
         "anomaly_detection_mean_f1": 1.0,
         "anomaly_detection_min_f1": 1.0,
         "assigned_deliveries": 4000,
-        "clean_issue_count": 0,
+        "clean_issue_count": 116,
         "clean_validation_passed": true,
         "delivered_deliveries": 3984,
         "on_time_rate": 1.0,
-        "route_count": 521,
+        "route_count": 522,
         "service_rate": 0.996,
         "unserved_deliveries": 0
       },
@@ -193,34 +193,34 @@
       "seed": 20261022,
       "solver_time_limit_seconds": 15,
       "stages": {
-        "detect_anomalies": 1.2705,
-        "generate": 34.1812,
-        "inject_anomalies": 12.7987,
-        "measured_sum": 716.8428,
-        "persist": 59.0461,
-        "plan": 481.1065,
-        "reporting": 0.2703,
-        "simulate": 9.2245,
-        "total": 886.069,
-        "validate_clean": 57.5978,
-        "validate_dirty": 61.3472
+        "detect_anomalies": 1.1894,
+        "generate": 35.7934,
+        "inject_anomalies": 12.201,
+        "measured_sum": 712.1864,
+        "persist": 52.5906,
+        "plan": 479.8785,
+        "reporting": 0.2664,
+        "simulate": 11.3776,
+        "total": 875.5161,
+        "validate_clean": 59.9304,
+        "validate_dirty": 58.9591
       },
       "status": "SUCCEEDED",
       "throughput": {
-        "deliveries_per_second": 4.514,
-        "diagnostics_rows_per_second": 697.452
+        "deliveries_per_second": 4.569,
+        "diagnostics_rows_per_second": 705.891
       },
       "timing": {
-        "finalization_seconds": 124.0128,
-        "measured_stage_seconds": 716.8428,
-        "persist_stage_seconds": 59.0461,
-        "persist_total_seconds": 183.0589,
-        "planning_seconds": 481.1065,
+        "finalization_seconds": 118.8549,
+        "measured_stage_seconds": 712.1864,
+        "persist_stage_seconds": 52.5906,
+        "persist_total_seconds": 171.4455,
+        "planning_seconds": 479.8785,
         "solver_run_count": 30,
-        "solver_seconds": 457.6508,
-        "solver_seconds_per_day": 15.255,
-        "total_seconds": 886.069,
-        "unattributed_seconds": 45.2134
+        "solver_seconds": 457.5214,
+        "solver_seconds_per_day": 15.2507,
+        "total_seconds": 875.5161,
+        "unattributed_seconds": 44.4748
       }
     }
   ]

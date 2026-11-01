@@ -4,13 +4,20 @@
 
 FleetMind supports Python 3.11–3.13. OR-Tools wheels are not published for every newer Python release, and Python 3.14
 is not supported by the pinned OR-Tools version. The verified environment for this repository is Python 3.13.9 on
-Windows 11 with a local virtual environment.
+Windows 11 with a local virtual environment. Confirm the interpreter version before creating the environment.
 
 ```powershell
+# Use py -3.13 only if the Windows launcher lists that runtime. Otherwise pass
+# the full path to any Python 3.11-3.13 executable, for example:
+# C:\path\to\python3.13.exe -m venv .venv
+py -3.13 --version
 py -3.13 -m venv .venv
+
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-pip install -e ".[dev]"
+python -m pip install -r requirements.lock
+python -m pip install -e . --no-deps
+python -m pip check
 ```
 
 Verify the installation:
@@ -24,14 +31,10 @@ The virtual environment is local and ignored by Git (`.venv/` is not checked in)
 above, `.\.venv\Scripts\python.exe -m fleetmind` also works without activating the shell.
 
 `requirements.lock` pins the exact dependency versions that passed verification on Python 3.13.9 / Windows 11. It is a
-snapshot of the verified environment, including transitive and development packages, not a cross-platform resolver
-lock. To recreate the verified environment:
-
-```powershell
-python -m pip install -r requirements.lock
-python -m pip install -e . --no-deps
-python -m pip check
-```
+snapshot of the verified environment, including transitive, development, and dashboard packages, not a cross-platform
+resolver lock. Installing it first and then adding the project with `--no-deps` keeps the verified versions unchanged;
+`pip install -e ".[dev]"` would re-resolve the ranges in `pyproject.toml` and can move packages. Regenerate the lock
+intentionally after a dependency change, then re-run the test suite.
 
 `pip check` verifies that installed packages have compatible requirements. A vulnerability-database audit is not run
 by the test suite; see `docs/verification.md` for the dependency-audit evidence and its limits.
@@ -129,8 +132,10 @@ from opening the same database while Streamlit is active.
 python -m fleetmind dashboard --database outputs/fleetmind.duckdb
 ```
 
-The app defaults to port 8501. It selects the most recent run by `started_at`; the sidebar run selector lists all
-persisted runs. To point the app at a different warehouse without the CLI:
+The app listens on `127.0.0.1:8501` by default. The CLI passes `--server.address 127.0.0.1`; the repository
+`.streamlit/config.toml` supplies the same address when using the standalone wrapper. It selects the most recent run
+by `started_at`; the sidebar run selector lists all persisted runs. To point the app at a different warehouse without
+the CLI:
 
 ```powershell
 $env:FLEETMIND_DB = "F:\path\to\fleetmind.duckdb"
@@ -139,8 +144,9 @@ streamlit run dashboard\app.py
 
 If the warehouse is missing or empty, the app renders an explanatory empty state instead of failing.
 
-The dashboard is a localhost-only, read-only inspection tool. Streamlit binds to localhost by default, and the app has
-no authentication or authorization layer. Do not expose the port publicly, and only open warehouses you trust.
+The dashboard is a localhost-only, read-only inspection tool with no authentication or authorization layer. Every
+shipped launch path binds to `127.0.0.1`; do not override the address, expose the port through a proxy or tunnel, or
+open warehouses you do not trust.
 
 ## Benchmarks
 

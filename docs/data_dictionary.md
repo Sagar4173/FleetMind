@@ -120,7 +120,7 @@ Customer demand before it becomes a planned delivery. Each order has exactly one
 | `priority` | `LOW`, `STANDARD`, `HIGH`, `URGENT`. |
 | `handling_class` | `AMBIENT`, `REFRIGERATED`, `FRAGILE`, `BULK`. |
 | `required_equipment` | Equipment the vehicle must provide. |
-| `demand_units`, `weight_kg`, `volume_m3` | Demand size. |
+| `demand_units`, `weight_kg`, `volume_m3` | Demand size. Weight and unit count are hard planning constraints; volume is carried as an advisory dimension. |
 | `service_duration_min` | Planned service time. |
 | `time_window_id` | Hard receiving window. |
 | `status` | `CONFIRMED` at generation; later `ASSIGNED`, `DELIVERED`, `FAILED`, `UNSERVED`, or `CANCELLED`. |
@@ -137,7 +137,7 @@ The execution-facing form of an order. IDs are deterministic and share the order
 | `order_id`, `site_id` | Parent order and destination. |
 | `service_date` | Day the delivery is requested. |
 | `priority`, `handling_class`, `required_equipment` | Planning attributes copied from the order. |
-| `demand_units`, `weight_kg`, `volume_m3`, `service_duration_min` | Demand and service time. |
+| `demand_units`, `weight_kg`, `volume_m3`, `service_duration_min` | Demand and service time. Weight and unit count are hard constraints; volume is advisory. |
 | `time_window_id` | Hard window. |
 | `status` | `PENDING` → `ASSIGNED` → `DELIVERED` / `FAILED` / `UNSERVED`. |
 | `created_at` | Record creation timestamp. |
@@ -151,7 +151,8 @@ Fleet identity, physical limits, and equipment capabilities.
 `effective_to`.
 
 `vehicle_capacities`: `capacity_id`, `vehicle_id`, `capacity_units`, `max_weight_kg`, `max_volume_m3`,
-`dimension_note`. One capacity row per vehicle.
+`dimension_note`. One capacity row per vehicle. `capacity_units` are synthetic dock handling units. Unit capacity and
+weight are hard routing constraints; `max_volume_m3` is advisory and is not enforced by OR-Tools.
 
 `vehicle_equipment`: `vehicle_id`, `equipment`; composite key `(vehicle_id, equipment)`. Equipment values include
 `AMBIENT`, `REFRIGERATED`, `FRAGILE`, `BULK`, `LIFT_GATE`.
@@ -239,7 +240,9 @@ One planned route per vehicle/shift/day that serves at least one stop.
 | `stop_count`, `delivered_stops`, `failed_stops` | Stop outcome counts. |
 | `load_units`, `capacity_units` | Unit load and vehicle unit capacity. |
 | `load_weight_kg`, `capacity_weight_kg` | Weight load and vehicle weight capacity. |
-| `distance_km`, `travel_minutes`, `service_minutes`, `wait_minutes` | Route aggregates. |
+| `distance_km`, `travel_minutes` | Route distance and travel aggregates. |
+| `service_minutes`, `wait_minutes` | **Planned** route service and waiting minutes from the routing model. |
+| `actual_service_minutes`, `actual_wait_minutes` | **Executed** route service and waiting minutes, summed from stop actual dwell. Null before execution. |
 | `solver_status` | `OPTIMAL`, `FEASIBLE`, `INFEASIBLE`, `TIMEOUT`, `UNKNOWN`. |
 | `objective_value`, `solve_seconds` | Solver result and wall time. |
 | `shift_overrun_minutes` | Actual end beyond shift end, zero when within shift. |
@@ -256,9 +259,14 @@ Ordered stops within a route.
 | `delivery_id`, `site_id`, `time_window_id` | Delivery, destination, and window. |
 | `planned_arrival`, `planned_service_start`, `planned_departure` | Planned timeline. |
 | `actual_arrival`, `actual_service_start`, `actual_departure` | Simulated timeline. |
-| `wait_minutes`, `service_minutes` | Waiting and service time. |
+| `wait_minutes`, `service_minutes` | **Planned** waiting and service time from the routing model. Preserved unchanged by execution. |
+| `actual_wait_minutes`, `actual_service_minutes` | **Executed** dwell derived from `actual_arrival`/`actual_service_start`/`actual_departure`. Null when the stop never executed. |
 | `demand_units`, `weight_kg` | Stop load contribution. |
 | `status` | `ASSIGNED`, `DELIVERED`, `FAILED`, or `UNSERVED`. |
+
+The distinction matters: planned dwell answers "what did the plan expect?" and actual dwell answers "what happened?".
+Execution does not overwrite `wait_minutes` or `service_minutes`. A failed stop keeps its planned service minutes but
+records only the configured failed-attempt duration as actual service time.
 
 ### `route_legs`
 

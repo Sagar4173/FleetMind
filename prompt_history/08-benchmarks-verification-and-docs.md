@@ -1,5 +1,7 @@
 # 08 — Benchmarks, verification, and documentation
 
+> **Supplementary normalized summary.** This file groups the work by theme for readability. It is not a verbatim transcript. The user-authored prompt text is preserved in [`verbatim/opencode-prompts.json`](verbatim/opencode-prompts.json) and the Markdown renderings under [`verbatim/opencode/`](verbatim/opencode/). Figures quoted here describe the milestone at the time it was written; the final evidence is recorded in [`../docs/verification.md`](../docs/verification.md).
+
 ## Context
 
 The pipeline, warehouse, CLI, and dashboard were working. The remaining requirement was evidence: measured
@@ -134,4 +136,3 @@ report and `docs/benchmark_methodology.md`.
 - Anomaly detection is rule-based and limited to the six specified classes.
 - Peak RSS is below 1 GB at the measured scales, but the larger run uses roughly twice the baseline memory. The
   quadratic travel matrix is the main scaling constraint.
-- No changes were pushed. Milestone commits remain local to the repository.

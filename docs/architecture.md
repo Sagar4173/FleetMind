@@ -48,7 +48,9 @@ src/fleetmind/
    assignments, and solver runs.
 4. **Simulation.** Every planned route is executed. Dispatch delay, travel variance, service variance, customer
    availability, and late-arrival rules are applied deterministically. The result includes executed route/stop/leg
-   rows, delivery outcomes, and route/delivery event ledgers.
+   rows, delivery outcomes, and route/delivery event ledgers. Planned dwell (`wait_minutes`, `service_minutes`) is
+   preserved unchanged; executed dwell is published separately as `actual_wait_minutes` and
+   `actual_service_minutes`, derived from the stored execution timestamps.
 5. **Clean validation.** `validate_full` checks the complete clean snapshot. If errors or critical issues exist, the
    run is marked `FAILED`; evidence is still persisted before the CLI raises.
 6. **Reporting.** KPI metrics are computed with explicit formulas and dimensions. Reconciliation checks compare
