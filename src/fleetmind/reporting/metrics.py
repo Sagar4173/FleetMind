@@ -218,9 +218,13 @@ def compute_report_metrics(
     total_travel = float(pd.to_numeric(routes.get("travel_minutes", pd.Series(dtype=float)), errors="coerce").fillna(0).sum())
     total_service = float(pd.to_numeric(routes.get("service_minutes", pd.Series(dtype=float)), errors="coerce").fillna(0).sum())
     total_wait = float(pd.to_numeric(routes.get("wait_minutes", pd.Series(dtype=float)), errors="coerce").fillna(0).sum())
+    total_actual_service = float(pd.to_numeric(routes.get("actual_service_minutes", pd.Series(dtype=float)), errors="coerce").fillna(0).sum())
+    total_actual_wait = float(pd.to_numeric(routes.get("actual_wait_minutes", pd.Series(dtype=float)), errors="coerce").fillna(0).sum())
     add("routing", "total_travel_hours", total_travel / 60.0, "hours")
-    add("routing", "total_service_hours", total_service / 60.0, "hours")
-    add("routing", "total_wait_hours", total_wait / 60.0, "hours")
+    add("routing", "total_service_hours", total_service / 60.0, "hours", formula="sum planned route service minutes / 60")
+    add("routing", "total_wait_hours", total_wait / 60.0, "hours", formula="sum planned route wait minutes / 60")
+    add("routing", "total_actual_service_hours", total_actual_service / 60.0, "hours", formula="sum actual route service minutes / 60")
+    add("routing", "total_actual_wait_hours", total_actual_wait / 60.0, "hours", formula="sum actual route wait minutes / 60")
     add(
         "routing", "average_route_hours",
         _ratio(total_travel + total_service + total_wait, route_count) / 60.0,
@@ -389,6 +393,8 @@ def compute_report_metrics(
         "unserved_rate": value("service", "unserved_rate"),
         "route_count": int(value("routing", "route_count")),
         "total_distance_km": value("routing", "total_distance_km"),
+        "total_actual_service_hours": value("routing", "total_actual_service_hours"),
+        "total_actual_wait_hours": value("routing", "total_actual_wait_hours"),
         "capacity_utilization_units": value("routing", "capacity_utilization_units"),
         "fleet_utilization": value("fleet", "fleet_utilization"),
         "routes_with_shift_overrun": int(value("reliability", "routes_with_shift_overrun")),
@@ -428,10 +434,16 @@ def compute_reconciliation(
     stop_counts = partition(stops, "status")
     numeric = lambda frame, column: pd.to_numeric(frame.get(column, pd.Series(dtype=float)), errors="coerce").fillna(0)
 
-    checks: list[tuple[str, float, float, str]] = []
+    checks: list[tuple[str, float, float, str, float]] = []
 
-    def add(name: str, expected: float, actual: float, details: str = "") -> None:
-        checks.append((name, float(expected), float(actual), details))
+    def add(
+        name: str,
+        expected: float,
+        actual: float,
+        details: str = "",
+        tolerance: float = 1e-6,
+    ) -> None:
+        checks.append((name, float(expected), float(actual), details, tolerance))
 
     add(
         "delivery_assignment_coverage",
@@ -497,6 +509,20 @@ def compute_reconciliation(
         "Route wait minutes must equal the sum of stop wait minutes.",
     )
     add(
+        "route_actual_service_minutes",
+        float(numeric(routes, "actual_service_minutes").sum()),
+        float(numeric(stops, "actual_service_minutes").sum()),
+        "Route actual service minutes must equal the sum of stop actual service minutes.",
+        tolerance=0.01,
+    )
+    add(
+        "route_actual_wait_minutes",
+        float(numeric(routes, "actual_wait_minutes").sum()),
+        float(numeric(stops, "actual_wait_minutes").sum()),
+        "Route actual wait minutes must equal the sum of stop actual wait minutes.",
+        tolerance=0.01,
+    )
+    add(
         "route_distance",
         float(numeric(routes, "distance_km").sum()),
         float(numeric(legs, "planned_distance_km").sum()),
@@ -528,7 +554,7 @@ def compute_reconciliation(
     )
 
     rows: list[ReconciliationCheck] = []
-    for name, expected, actual, details in checks:
+    for name, expected, actual, details, tolerance in checks:
         difference = round(actual - expected, 6)
         rows.append(
             ReconciliationCheck(
@@ -537,7 +563,7 @@ def compute_reconciliation(
                 expected=round(expected, 6),
                 actual=round(actual, 6),
                 difference=difference,
-                passed=abs(difference) <= 1e-6,
+                passed=abs(difference) <= max(tolerance, 1e-6),
                 details=details,
             )
         )

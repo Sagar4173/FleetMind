@@ -187,6 +187,8 @@ class ExecutionSimulator:
             actual_end = actual_start
             delivered_stops = 0
             failed_stops = 0
+            actual_wait_total = 0.0
+            actual_service_total = 0.0
             route_event_sequence = 1
             route_events.append(
                 RouteEvent(
@@ -267,9 +269,17 @@ class ExecutionSimulator:
                     )
                     note = "Delivered to the customer."
                 actual_departure = _seconds(_add_minutes(service_start, service_minutes))
+                # Derive dwell from the timestamps that are actually stored so
+                # the published durations reconcile exactly with execution
+                # times after second-level rounding.
                 actual_wait = max(
                     0.0, (service_start - actual_arrival).total_seconds() / 60.0
                 )
+                actual_service = (
+                    actual_departure - service_start
+                ).total_seconds() / 60.0
+                actual_wait_total += actual_wait
+                actual_service_total += actual_service
 
                 simulated_stops.append(
                     RouteStop(
@@ -288,6 +298,8 @@ class ExecutionSimulator:
                         actual_departure=actual_departure,
                         wait_minutes=float(stop_row["wait_minutes"]),
                         service_minutes=float(stop_row["service_minutes"]),
+                        actual_wait_minutes=round(actual_wait, 6),
+                        actual_service_minutes=round(actual_service, 6),
                         demand_units=int(stop_row["demand_units"]),
                         weight_kg=float(stop_row["weight_kg"]),
                         status=stop_status,
@@ -618,6 +630,8 @@ class ExecutionSimulator:
                     "actual_end": return_arrival,
                     "delivered_stops": delivered_stops,
                     "failed_stops": failed_stops,
+                    "actual_wait_minutes": round(actual_wait_total, 6),
+                    "actual_service_minutes": round(actual_service_total, 6),
                     "shift_overrun_minutes": round(overrun_minutes, 2),
                 }
             )

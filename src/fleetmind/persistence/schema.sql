@@ -1,5 +1,5 @@
 -- FleetMind warehouse schema (generated from fleetmind.models.entities).
--- schema_version: 1.0.0
+-- schema_version: 1.1.0
 -- Every snapshot table is keyed by run_id plus the entity key.
 
 CREATE TABLE IF NOT EXISTS depots (
@@ -227,6 +227,8 @@ CREATE TABLE IF NOT EXISTS routes (
   "travel_minutes" DOUBLE,
   "service_minutes" DOUBLE,
   "wait_minutes" DOUBLE,
+  "actual_service_minutes" DOUBLE,
+  "actual_wait_minutes" DOUBLE,
   "solver_status" VARCHAR,
   "objective_value" DOUBLE,
   "solve_seconds" DOUBLE,
@@ -251,6 +253,8 @@ CREATE TABLE IF NOT EXISTS route_stops (
   "actual_departure" TIMESTAMP,
   "wait_minutes" DOUBLE,
   "service_minutes" DOUBLE,
+  "actual_wait_minutes" DOUBLE,
+  "actual_service_minutes" DOUBLE,
   "demand_units" BIGINT,
   "weight_kg" DOUBLE,
   "status" VARCHAR,
@@ -499,6 +503,8 @@ CREATE TABLE IF NOT EXISTS dirty_routes (
   "travel_minutes" DOUBLE,
   "service_minutes" DOUBLE,
   "wait_minutes" DOUBLE,
+  "actual_service_minutes" DOUBLE,
+  "actual_wait_minutes" DOUBLE,
   "solver_status" VARCHAR,
   "objective_value" DOUBLE,
   "solve_seconds" DOUBLE,
@@ -523,6 +529,8 @@ CREATE TABLE IF NOT EXISTS dirty_route_stops (
   "actual_departure" TIMESTAMP,
   "wait_minutes" DOUBLE,
   "service_minutes" DOUBLE,
+  "actual_wait_minutes" DOUBLE,
+  "actual_service_minutes" DOUBLE,
   "demand_units" BIGINT,
   "weight_kg" DOUBLE,
   "status" VARCHAR,

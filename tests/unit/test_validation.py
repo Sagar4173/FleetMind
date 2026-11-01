@@ -1,11 +1,21 @@
 from __future__ import annotations
 
+from pathlib import Path
+
+import pandas as pd
 import pytest
 
 from fleetmind.config import load_config
 from fleetmind.generation.factory import generate_dataset
-from fleetmind.models.enums import DQIssueType
-from fleetmind.validation.engine import DataQualityValidator, validate_master
+from fleetmind.models.enums import DQIssueType, DQSeverity
+from fleetmind.validation.engine import (
+    DataQualityValidator,
+    IssueCollector,
+    validate_full,
+    validate_master,
+)
+
+SAMPLE = Path(__file__).resolve().parents[2] / "data" / "sample" / "starter-run"
 
 
 @pytest.fixture(scope="module")
@@ -116,3 +126,60 @@ def test_quarantine_frame_serializes_records(tables, config) -> None:
     frame = validator.quarantine_frame(result.quarantined)
     assert not frame.empty
     assert set(frame.columns) == {"run_id", "source_table", "record_json", "quarantined_at"}
+
+
+def test_vehicle_dimension_note_states_volume_is_advisory(tables) -> None:
+    notes = tables["vehicle_capacities"]["dimension_note"].astype(str)
+    assert notes.str.contains("advisory only").all()
+    assert not notes.str.contains("independent hard limits").any()
+
+
+def test_volume_over_capacity_is_a_warning_not_an_error(tiny_pipeline) -> None:
+    tables = {
+        name: frame.copy(deep=True) for name, frame in tiny_pipeline.run.tables.items()
+    }
+    stops = tables["route_stops"]
+    route_id = str(stops.iloc[0]["route_id"])
+    delivery_ids = set(
+        stops.loc[stops["route_id"].astype(str) == route_id, "delivery_id"].astype(str)
+    )
+    tables["deliveries"].loc[
+        tables["deliveries"]["delivery_id"].astype(str).isin(delivery_ids),
+        "volume_m3",
+    ] = 500.0
+
+    result = validate_full(tables, tiny_pipeline.config)
+
+    assert result.passed
+    assert result.error_count == 0
+    matching = result.issues[
+        result.issues["issue_type"] == DQIssueType.VOLUME_CAPACITY_EXCEEDED.value
+    ]
+    assert not matching.empty
+    assert matching["entity_id"].eq(route_id).any()
+    assert set(matching["severity"]) == {DQSeverity.WARNING.value}
+    assert matching["details"].str.contains("advisory").all()
+
+
+def test_starter_sample_volume_examples_are_advisory_warnings(config) -> None:
+    tables = {
+        "routes": pd.read_csv(SAMPLE / "simulation" / "routes.csv"),
+        "route_stops": pd.read_csv(SAMPLE / "simulation" / "route_stops.csv"),
+        "deliveries": pd.read_csv(SAMPLE / "simulation" / "deliveries.csv"),
+        "vehicles": pd.read_csv(SAMPLE / "master" / "vehicles.csv"),
+        "vehicle_capacities": pd.read_csv(
+            SAMPLE / "master" / "vehicle_capacities.csv"
+        ),
+    }
+    collector = IssueCollector("RUN-SAMPLE")
+    DataQualityValidator(config)._check_route_capacity(tables, collector)
+    issues = collector.frame()
+    volume = issues[
+        issues["issue_type"] == DQIssueType.VOLUME_CAPACITY_EXCEEDED.value
+    ]
+
+    # The two documented starter examples must be reported, and only as
+    # advisory warnings.
+    assert set(volume["entity_id"]) == {"RTE-2026-000008", "RTE-2026-000017"}
+    assert set(volume["severity"]) == {DQSeverity.WARNING.value}
+    assert volume["details"].str.contains("advisory").all()

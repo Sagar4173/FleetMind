@@ -352,6 +352,8 @@ NUMERIC_COLUMNS: dict[str, list[str]] = {
         "stop_sequence",
         "wait_minutes",
         "service_minutes",
+        "actual_wait_minutes",
+        "actual_service_minutes",
         "demand_units",
         "weight_kg",
     ],
@@ -365,6 +367,8 @@ NUMERIC_COLUMNS: dict[str, list[str]] = {
         "travel_minutes",
         "service_minutes",
         "wait_minutes",
+        "actual_service_minutes",
+        "actual_wait_minutes",
     ],
     "travel_time_matrix": ["distance_km", "base_travel_minutes"],
     "travel_scenarios": [
@@ -1238,15 +1242,43 @@ class DataQualityValidator:
             stop_count=("stop_id", "count"),
         )
         routes = tables["routes"].merge(loads, on="route_id", how="left")
-        caps = tables["vehicle_capacities"][
-            ["vehicle_id", "capacity_units", "max_weight_kg"]
-        ].rename(
+        capacity_columns = [
+            "vehicle_id",
+            "capacity_units",
+            "max_weight_kg",
+        ]
+        if "max_volume_m3" in tables["vehicle_capacities"].columns:
+            capacity_columns.append("max_volume_m3")
+        caps = tables["vehicle_capacities"][capacity_columns].rename(
             columns={
                 "capacity_units": "vehicle_capacity_units",
                 "max_weight_kg": "vehicle_capacity_weight_kg",
+                "max_volume_m3": "vehicle_capacity_volume_m3",
             }
         )
         routes = routes.merge(caps, on="vehicle_id", how="left")
+
+        # Volume is retained as an advisory dimension. Route volume is derived
+        # from the delivery records because route_stops carries no volume
+        # column. Exceeding it is reported as a warning, never as a hard
+        # constraint failure.
+        deliveries = tables.get("deliveries")
+        if (
+            deliveries is not None
+            and {"delivery_id", "volume_m3"}.issubset(deliveries.columns)
+            and "delivery_id" in stops.columns
+        ):
+            volumes = (
+                stops[["route_id", "delivery_id"]]
+                .merge(
+                    deliveries[["delivery_id", "volume_m3"]],
+                    on="delivery_id",
+                    how="left",
+                )
+                .groupby("route_id", as_index=False)
+                .agg(stop_volume_m3=("volume_m3", "sum"))
+            )
+            routes = routes.merge(volumes, on="route_id", how="left")
         for index, row in routes.iterrows():
             units = float(row.get("stop_units", 0) or 0)
             weight = float(row.get("stop_weight", 0) or 0)
@@ -1273,6 +1305,29 @@ class DataQualityValidator:
                     "routes",
                     field_name="load_weight_kg",
                     severity=DQSeverity.CRITICAL,
+                )
+            volume = row.get("stop_volume_m3")
+            capacity_volume = row.get("vehicle_capacity_volume_m3")
+            if (
+                pd.notna(volume)
+                and pd.notna(capacity_volume)
+                and float(volume) > float(capacity_volume) + 1e-9
+            ):
+                collector.add(
+                    DQIssueType.VOLUME_CAPACITY_EXCEEDED,
+                    "routes",
+                    str(row["route_id"]),
+                    (
+                        f"route volume {float(volume):g} m3 exceeds advisory "
+                        f"vehicle volume {float(capacity_volume):g} m3"
+                    ),
+                    "routes",
+                    field_name="load_volume_m3",
+                    severity=DQSeverity.WARNING,
+                    details=(
+                        "Volume is not enforced by the router. This warning is "
+                        "advisory and does not fail clean validation."
+                    ),
                 )
 
     def _check_route_time_windows(
@@ -1513,13 +1568,68 @@ class DataQualityValidator:
         if not {"routes", "route_stops"}.issubset(tables):
             return
         stops = tables["route_stops"]
-        aggregates = stops.groupby("route_id").agg(
-            stop_count=("stop_id", "count"),
-            load_units=("demand_units", "sum"),
-            load_weight_kg=("weight_kg", "sum"),
-            service_minutes=("service_minutes", "sum"),
-            wait_minutes=("wait_minutes", "sum"),
-        )
+        if {"actual_arrival", "actual_service_start", "actual_departure"}.issubset(
+            stops.columns
+        ):
+            arrival = pd.to_datetime(stops["actual_arrival"], errors="coerce")
+            service_start = pd.to_datetime(
+                stops["actual_service_start"], errors="coerce"
+            )
+            departure = pd.to_datetime(stops["actual_departure"], errors="coerce")
+            for index in stops.index:
+                if pd.isna(arrival.loc[index]):
+                    continue
+                if pd.isna(service_start.loc[index]) or pd.isna(departure.loc[index]):
+                    continue
+                expected = {
+                    "actual_wait_minutes": max(
+                        0.0,
+                        (
+                            service_start.loc[index] - arrival.loc[index]
+                        ).total_seconds()
+                        / 60.0,
+                    ),
+                    "actual_service_minutes": (
+                        departure.loc[index] - service_start.loc[index]
+                    ).total_seconds()
+                    / 60.0,
+                }
+                for column, value in expected.items():
+                    if column not in stops.columns:
+                        continue
+                    recorded = stops.loc[index, column]
+                    if pd.isna(recorded):
+                        collector.add(
+                            DQIssueType.ARITHMETIC_RECONCILIATION_ERROR,
+                            "route_stops",
+                            str(stops.loc[index, "stop_id"]),
+                            f"{column} is missing for an executed stop",
+                            "route_stops",
+                            field_name=column,
+                        )
+                    elif abs(float(recorded) - value) > 0.01:
+                        collector.add(
+                            DQIssueType.ARITHMETIC_RECONCILIATION_ERROR,
+                            "route_stops",
+                            str(stops.loc[index, "stop_id"]),
+                            (
+                                f"{column}={float(recorded):g} does not match the "
+                                f"execution timestamps ({value:g})"
+                            ),
+                            "route_stops",
+                            field_name=column,
+                        )
+        aggregations: dict[str, tuple[str, str]] = {
+            "stop_count": ("stop_id", "count"),
+            "load_units": ("demand_units", "sum"),
+            "load_weight_kg": ("weight_kg", "sum"),
+            "service_minutes": ("service_minutes", "sum"),
+            "wait_minutes": ("wait_minutes", "sum"),
+        }
+        for column in ("actual_service_minutes", "actual_wait_minutes"):
+            if column in stops.columns:
+                aggregations[column] = (column, "sum")
+        aggregates = stops.groupby("route_id").agg(**aggregations)
         for index, route in tables["routes"].iterrows():
             route_id = str(route["route_id"])
             if route_id not in aggregates.index:
@@ -1542,6 +1652,9 @@ class DataQualityValidator:
                 ("service_minutes", float(aggregate["service_minutes"])),
                 ("wait_minutes", float(aggregate["wait_minutes"])),
             ]
+            for column in ("actual_service_minutes", "actual_wait_minutes"):
+                if column in aggregate.index:
+                    checks.append((column, float(aggregate[column])))
             for column, actual in checks:
                 if column not in route or pd.isna(route[column]):
                     continue

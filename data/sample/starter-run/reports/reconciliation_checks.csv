@@ -9,6 +9,8 @@ RUN-C16424724715,route_load_units,3939.0,3939.0,0.0,True,Route load_units must e
 RUN-C16424724715,route_load_weight,58224.96,58224.96,0.0,True,Route load weight must equal the sum of stop weight.
 RUN-C16424724715,route_service_minutes,2872.0,2872.0,0.0,True,Route service minutes must equal the sum of stop service minutes.
 RUN-C16424724715,route_wait_minutes,4094.0,4094.0,0.0,True,Route wait minutes must equal the sum of stop wait minutes.
+RUN-C16424724715,route_actual_service_minutes,2809.766665,2809.766667,2e-06,True,Route actual service minutes must equal the sum of stop actual service minutes.
+RUN-C16424724715,route_actual_wait_minutes,4046.633333,4046.633333,-0.0,True,Route actual wait minutes must equal the sum of stop actual wait minutes.
 RUN-C16424724715,route_distance,781.799,781.799,0.0,True,Route distance must equal the sum of planned leg distance.
 RUN-C16424724715,route_travel_minutes,1750.0,1750.0,0.0,True,Route travel minutes must equal the sum of planned leg travel.
 RUN-C16424724715,route_delivered_stops,116.0,116.0,0.0,True,Route delivered_stops must equal stop rows marked DELIVERED.

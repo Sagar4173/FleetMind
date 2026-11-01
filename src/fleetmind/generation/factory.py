@@ -528,7 +528,10 @@ def _generate_fleet(
                 capacity_units=spec["capacity_units"],
                 max_weight_kg=spec["max_weight_kg"],
                 max_volume_m3=spec["max_volume_m3"],
-                dimension_note="units are synthetic dock handling units; weight/volume are independent hard limits",
+                dimension_note=(
+                    "units are synthetic dock handling units; weight is a hard "
+                    "routing constraint and volume is advisory only"
+                ),
             )
         )
         for equipment in spec["equipment"]:

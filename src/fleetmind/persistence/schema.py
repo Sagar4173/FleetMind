@@ -17,7 +17,7 @@ from pydantic import BaseModel
 
 from fleetmind.models import entities
 
-SCHEMA_VERSION = "1.0.0"
+SCHEMA_VERSION = "1.1.0"
 
 
 @dataclass(frozen=True)
@@ -160,7 +160,7 @@ def table_spec(name: str) -> TableSpec:
         raise KeyError(f"unknown warehouse table: {name}") from exc
 
 
-def _duckdb_type(annotation: object) -> str:
+def duckdb_type(annotation: object) -> str:
     if annotation is datetime:
         return "TIMESTAMP"
     if annotation is date:
@@ -176,7 +176,7 @@ def _duckdb_type(annotation: object) -> str:
     origin = get_origin(annotation)
     if origin in (Union, types.UnionType):
         members = [item for item in get_args(annotation) if item is not type(None)]
-        return _duckdb_type(members[0]) if len(members) == 1 else "VARCHAR"
+        return duckdb_type(members[0]) if len(members) == 1 else "VARCHAR"
     if origin is Literal:
         return "VARCHAR"
     return "VARCHAR"
@@ -194,7 +194,7 @@ def render_schema() -> str:
         for field_name, field in spec.model.model_fields.items():
             if field_name == "run_id":
                 continue
-            definitions.append(f'  "{field_name}" {_duckdb_type(field.annotation)}')
+            definitions.append(f'  "{field_name}" {duckdb_type(field.annotation)}')
         primary_key = ", ".join(f'"{column}"' for column in spec.primary_key)
         definitions.append(f"  PRIMARY KEY ({primary_key})")
         lines.append(f"CREATE TABLE IF NOT EXISTS {spec.name} (")

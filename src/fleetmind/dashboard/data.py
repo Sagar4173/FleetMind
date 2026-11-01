@@ -216,6 +216,8 @@ def route_summary_frame(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
             "travel_minutes",
             "service_minutes",
             "wait_minutes",
+            "actual_service_minutes",
+            "actual_wait_minutes",
             "shift_overrun_minutes",
             "status",
         )

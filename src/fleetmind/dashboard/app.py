@@ -286,11 +286,19 @@ def _render_routing(tables: dict[str, pd.DataFrame], metrics: pd.DataFrame) -> N
                 "distance_km",
                 "travel_minutes",
                 "wait_minutes",
+                "actual_wait_minutes",
+                "service_minutes",
+                "actual_service_minutes",
                 "shift_overrun_minutes",
             )
             if column in day_routes
         ]
-        view = day_routes[display_columns].copy()
+        view = day_routes[display_columns].copy().rename(
+            columns={
+                "wait_minutes": "planned_wait_minutes",
+                "service_minutes": "planned_service_minutes",
+            }
+        )
         if "capacity_utilization" in view:
             view["capacity_utilization"] = view["capacity_utilization"].map(
                 lambda value: _pct(value) if pd.notna(value) else ""

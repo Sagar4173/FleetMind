@@ -126,14 +126,14 @@
       "orders": "bac5e60ab8baec67563c00292929f985580a92b9828aa1bf7329e7daee98acbf",
       "route_events": "6617fc4b373201cc9ecb68d6659d3d7cebfcdd5b4d2cdd02bc550449e48f1fe2",
       "route_legs": "dc9e966eab104ccc0cee2476664aaf20799954187be47669664b99696a8dd3fd",
-      "route_stops": "10bf1818f3bc5cd87681da58e3f682b60b51db97e93b609e953277b10fc5fcec",
-      "routes": "ca69b9aa00d536499a87dd88a29e78ea4f824aafca87cfaf096f482168041755",
+      "route_stops": "84ccd55b015577b6277924453b758d194ee6c5abe0f9c6e0596db2b93a0959d8",
+      "routes": "766148dd3f5fe134d4734a7a4c22670bf2d62d036aad04ad431f2306ef0c8e8c",
       "shifts": "14ab6754dd3c913f49722b28fe54ec6fe912cbe593f5d7f35f0ddf3165f4409e",
       "solver_runs": "879684df46195e1bb7c9040c832fc9aa05f6765464b4e8550d9316c07c057083",
       "time_windows": "95834501339acdd9e24edb0374ba129e829e4ba34a6c271795ed79851a41e526",
       "travel_scenarios": "80d93499604ae3bfeedd36b4d50b1bd19bc61fb1e4e3e84ffe4e11009d55e7f1",
       "travel_time_matrix": "3299f986907583dbda507101274638eab3ea435c5e16d9edf0ee78c7344a6ec0",
-      "vehicle_capacities": "e47ad2d4e1dc32388afae2046e3c17007ff20b6d6fdcbc86f0706b6c023e8fff",
+      "vehicle_capacities": "af099f739b9a1658d185ac3cd85b887506f47bc2857d215b9ec266ba524d2265",
       "vehicle_equipment": "65bb6c09d65f8cae1c483246448c01b5962b8cbe9075f85969a75ab1e563df18",
       "vehicles": "fc103b24b0eacf1bddcc4a1e80a13b6c51f4a3df2dae6afa815e92d03cbe4044"
     },
@@ -149,25 +149,25 @@
       "orders": "bac5e60ab8baec67563c00292929f985580a92b9828aa1bf7329e7daee98acbf",
       "route_events": "6617fc4b373201cc9ecb68d6659d3d7cebfcdd5b4d2cdd02bc550449e48f1fe2",
       "route_legs": "dc9e966eab104ccc0cee2476664aaf20799954187be47669664b99696a8dd3fd",
-      "route_stops": "217f6a6efd9843a8254a75f386b210cac5375dc27efb36c1f63308eb1850056a",
-      "routes": "aca1bd0fa679015ef6919ee4e40c02935c8ef5f796fe9b9c0dd6456ff3bf7f66",
+      "route_stops": "12e81d5aeae13f13615fe1f7713a47d9484b80e897b356801bce937d50900778",
+      "routes": "b46527e97a5bdbb6beaa0fece46b12c1184d1d28c489e21e9db9eab219c1f50b",
       "shifts": "14ab6754dd3c913f49722b28fe54ec6fe912cbe593f5d7f35f0ddf3165f4409e",
       "solver_runs": "879684df46195e1bb7c9040c832fc9aa05f6765464b4e8550d9316c07c057083",
       "time_windows": "95834501339acdd9e24edb0374ba129e829e4ba34a6c271795ed79851a41e526",
       "travel_scenarios": "80d93499604ae3bfeedd36b4d50b1bd19bc61fb1e4e3e84ffe4e11009d55e7f1",
       "travel_time_matrix": "3299f986907583dbda507101274638eab3ea435c5e16d9edf0ee78c7344a6ec0",
-      "vehicle_capacities": "e47ad2d4e1dc32388afae2046e3c17007ff20b6d6fdcbc86f0706b6c023e8fff",
+      "vehicle_capacities": "af099f739b9a1658d185ac3cd85b887506f47bc2857d215b9ec266ba524d2265",
       "vehicle_equipment": "65bb6c09d65f8cae1c483246448c01b5962b8cbe9075f85969a75ab1e563df18",
       "vehicles": "fc103b24b0eacf1bddcc4a1e80a13b6c51f4a3df2dae6afa815e92d03cbe4044"
     }
   },
-  "completed_at": "2026-11-01T01:20:30",
+  "completed_at": "2026-11-01T17:33:27",
   "config_hash": "c16424724715e796adbacc00f7480d36e6faa59964766d0bf9835d5ce19a74aa",
   "counts": {
     "anomaly_detections": 12,
-    "clean_issues": 0,
+    "clean_issues": 2,
     "clean_quarantine_records": 0,
-    "dirty_issues": 40,
+    "dirty_issues": 44,
     "dirty_quarantine_records": 24,
     "ground_truth_anomalies": 12,
     "master_customer_sites": 40,
@@ -204,6 +204,8 @@
     "on_time_rate": 1.0,
     "route_count": 25,
     "routes_with_shift_overrun": 0,
+    "total_actual_service_hours": 46.829444,
+    "total_actual_wait_hours": 67.443889,
     "total_deliveries": 120,
     "total_distance_km": 781.799,
     "unserved_deliveries": 2,
@@ -305,6 +307,24 @@
         "run_id": "RUN-C16424724715"
       },
       {
+        "actual": 2809.766667,
+        "check_name": "route_actual_service_minutes",
+        "details": "Route actual service minutes must equal the sum of stop actual service minutes.",
+        "difference": 2e-06,
+        "expected": 2809.766665,
+        "passed": true,
+        "run_id": "RUN-C16424724715"
+      },
+      {
+        "actual": 4046.633333,
+        "check_name": "route_actual_wait_minutes",
+        "details": "Route actual wait minutes must equal the sum of stop actual wait minutes.",
+        "difference": -0.0,
+        "expected": 4046.633333,
+        "passed": true,
+        "run_id": "RUN-C16424724715"
+      },
+      {
         "actual": 781.799,
         "check_name": "route_distance",
         "details": "Route distance must equal the sum of planned leg distance.",
@@ -350,39 +370,43 @@
         "run_id": "RUN-C16424724715"
       }
     ],
-    "passed": 15,
-    "total": 15
+    "passed": 17,
+    "total": 17
   },
   "run_id": "RUN-C16424724715",
   "seed": 20261022,
   "stage_durations_seconds": {
-    "detect_anomalies": 0.0287,
-    "generate": 0.3222,
-    "inject_anomalies": 0.1253,
-    "persist": 1.0581,
-    "plan": 35.0724,
-    "reporting": 0.0376,
-    "simulate": 0.0526,
-    "validate_clean": 0.3294,
-    "validate_dirty": 0.3435
+    "detect_anomalies": 0.029,
+    "generate": 0.292,
+    "inject_anomalies": 0.1401,
+    "persist": 1.5013,
+    "plan": 35.094,
+    "reporting": 0.0414,
+    "simulate": 0.0567,
+    "validate_clean": 0.3773,
+    "validate_dirty": 0.3648
   },
-  "started_at": "2026-11-01T01:19:53",
+  "started_at": "2026-11-01T17:32:49",
   "status": "SUCCEEDED",
   "validation": {
-    "clean_by_type": {},
+    "clean_by_type": {
+      "VOLUME_CAPACITY_EXCEEDED": 2
+    },
     "clean_critical": 0,
     "clean_errors": 0,
     "clean_passed": true,
     "dirty_by_type": {
+      "ARITHMETIC_RECONCILIATION_ERROR": 2,
       "ARRIVAL_BEFORE_PREVIOUS_DEPARTURE": 2,
       "COORDINATE_OUT_OF_REGION": 4,
       "DRIVER_SHIFT_EXCEEDED": 2,
       "INVALID_FOREIGN_KEY": 24,
       "ROUTE_CAPACITY_EXCEEDED": 2,
       "STOP_DUPLICATED": 4,
-      "STOP_OMITTED": 2
+      "STOP_OMITTED": 2,
+      "VOLUME_CAPACITY_EXCEEDED": 2
     },
-    "dirty_errors": 40,
+    "dirty_errors": 42,
     "dirty_passed": false
   },
   "warehouse": {
@@ -393,7 +417,7 @@
       "anomaly_detections": 12,
       "audit_records": 10,
       "customer_sites": 40,
-      "data_quality_issues": 40,
+      "data_quality_issues": 46,
       "deliveries": 120,
       "delivery_assignments": 120,
       "delivery_events": 592,
@@ -408,8 +432,8 @@
       "ground_truth_anomalies": 12,
       "orders": 120,
       "quarantine_records": 24,
-      "reconciliation_checks": 15,
-      "report_metrics": 114,
+      "reconciliation_checks": 17,
+      "report_metrics": 116,
       "route_events": 591,
       "route_legs": 143,
       "route_stops": 118,

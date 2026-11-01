@@ -324,8 +324,12 @@ class Route(Entity):
     capacity_weight_kg: float = Field(gt=0)
     distance_km: float = Field(default=0, ge=0)
     travel_minutes: float = Field(default=0, ge=0)
+    # Planned dwell aggregates from the routing model.
     service_minutes: float = Field(default=0, ge=0)
     wait_minutes: float = Field(default=0, ge=0)
+    # Executed dwell aggregates derived from stop timestamps.
+    actual_service_minutes: float | None = Field(default=None, ge=0)
+    actual_wait_minutes: float | None = Field(default=None, ge=0)
     solver_status: SolverStatus
     objective_value: float | None = None
     solve_seconds: float = Field(default=0, ge=0)
@@ -355,8 +359,12 @@ class RouteStop(Entity):
     actual_arrival: datetime | None = None
     actual_service_start: datetime | None = None
     actual_departure: datetime | None = None
+    # Planned dwell values from the routing model.
     wait_minutes: float = Field(default=0, ge=0)
     service_minutes: float = Field(gt=0)
+    # Executed dwell values derived from the actual timestamps.
+    actual_wait_minutes: float | None = Field(default=None, ge=0)
+    actual_service_minutes: float | None = Field(default=None, ge=0)
     demand_units: int = Field(gt=0)
     weight_kg: float = Field(gt=0)
     status: DeliveryStatus = DeliveryStatus.ASSIGNED
@@ -372,6 +380,24 @@ class RouteStop(Entity):
                 self.actual_arrival <= self.actual_service_start <= self.actual_departure
             ):
                 raise ValueError("actual stop chronology is invalid")
+            if (
+                self.actual_wait_minutes is None
+                or self.actual_service_minutes is None
+            ):
+                raise ValueError("actual stop requires actual dwell durations")
+            expected_wait = max(
+                0.0,
+                (self.actual_service_start - self.actual_arrival).total_seconds() / 60.0,
+            )
+            expected_service = (
+                self.actual_departure - self.actual_service_start
+            ).total_seconds() / 60.0
+            if abs(self.actual_wait_minutes - expected_wait) > 1e-4:
+                raise ValueError("actual dwell wait does not match the timestamps")
+            if abs(self.actual_service_minutes - expected_service) > 1e-4:
+                raise ValueError("actual dwell service does not match the timestamps")
+        elif self.actual_wait_minutes is not None or self.actual_service_minutes is not None:
+            raise ValueError("actual dwell requires actual timestamps")
         return self
 
 

@@ -20,7 +20,9 @@ def test_tiny_pipeline_is_clean_and_fully_evaluated(tiny_pipeline) -> None:
     run = tiny_pipeline.run
     assert run.status == "SUCCEEDED", run.error_message
     assert run.validation.passed
-    assert run.validation.issues.empty
+    assert run.validation.error_count == 0
+    if not run.validation.issues.empty:
+        assert set(run.validation.issues["severity"]) <= {"WARNING", "INFO"}
     assert run.anomaly_injection is not None
     assert run.anomaly_evaluation is not None
     assert run.dirty_validation is not None
@@ -39,6 +41,29 @@ def test_warehouse_schema_is_generated_consistently() -> None:
     assert "PRIMARY KEY (\"run_id\", \"route_id\")" in ddl
     assert "CREATE TABLE IF NOT EXISTS dirty_route_stops" in ddl
     assert "CREATE TABLE IF NOT EXISTS anomaly_detection_metrics" in ddl
+
+
+def test_warehouse_adds_columns_for_older_schema(tmp_path: Path) -> None:
+    import duckdb
+
+    path = tmp_path / "legacy.duckdb"
+    connection = duckdb.connect(str(path))
+    connection.execute(
+        "CREATE TABLE routes ("
+        "run_id VARCHAR NOT NULL, route_id VARCHAR NOT NULL, "
+        "PRIMARY KEY (run_id, route_id))"
+    )
+    connection.close()
+
+    with Warehouse(path) as warehouse:
+        columns = {
+            str(row[1])
+            for row in warehouse.connection.execute(
+                'PRAGMA table_info("routes")'
+            ).fetchall()
+        }
+    assert {"actual_wait_minutes", "actual_service_minutes"} <= columns
+    assert "service_minutes" in columns
 
 
 def test_warehouse_round_trip_and_idempotency(tiny_persisted) -> None:

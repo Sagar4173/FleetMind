@@ -169,7 +169,14 @@ def test_clean_pipeline_passes_full_validation(pipeline) -> None:
     config, _, _, _, tables = pipeline
     result = validate_full(tables, config)
     assert result.passed
-    assert result.issues.empty
+    assert result.error_count == 0
+    if not result.issues.empty:
+        # Volume is documented as advisory, so clean validation may emit
+        # warnings without failing hard constraints.
+        assert set(result.issues["severity"]) <= {"WARNING", "INFO"}
+        assert set(result.issues["issue_type"]) <= {
+            "VOLUME_CAPACITY_EXCEEDED"
+        }
 
 
 def test_simulation_is_deterministic(pipeline) -> None:

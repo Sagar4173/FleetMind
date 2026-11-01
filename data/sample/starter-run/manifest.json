@@ -101,7 +101,7 @@
     ]
   },
   "config_hash": "c16424724715e796adbacc00f7480d36e6faa59964766d0bf9835d5ce19a74aa",
-  "created_at": "2026-11-01T01:20:31",
+  "created_at": "2026-11-01T17:33:28",
   "dataset_version": "1.0.0",
   "mode": "FULL",
   "pipeline_version": "1.0.0",
@@ -195,7 +195,7 @@
         "rows": 120
       },
       "dirty_route_stops": {
-        "checksum": "217f6a6efd9843a8254a75f386b210cac5375dc27efb36c1f63308eb1850056a",
+        "checksum": "12e81d5aeae13f13615fe1f7713a47d9484b80e897b356801bce937d50900778",
         "columns": [
           "run_id",
           "stop_id",
@@ -212,6 +212,8 @@
           "actual_departure",
           "wait_minutes",
           "service_minutes",
+          "actual_wait_minutes",
+          "actual_service_minutes",
           "demand_units",
           "weight_kg",
           "status"
@@ -221,7 +223,7 @@
         "rows": 118
       },
       "dirty_routes": {
-        "checksum": "aca1bd0fa679015ef6919ee4e40c02935c8ef5f796fe9b9c0dd6456ff3bf7f66",
+        "checksum": "b46527e97a5bdbb6beaa0fece46b12c1184d1d28c489e21e9db9eab219c1f50b",
         "columns": [
           "run_id",
           "route_id",
@@ -247,6 +249,8 @@
           "travel_minutes",
           "service_minutes",
           "wait_minutes",
+          "actual_service_minutes",
+          "actual_wait_minutes",
           "solver_status",
           "objective_value",
           "solve_seconds",
@@ -481,7 +485,7 @@
         "rows": 1681
       },
       "vehicle_capacities": {
-        "checksum": "e47ad2d4e1dc32388afae2046e3c17007ff20b6d6fdcbc86f0706b6c023e8fff",
+        "checksum": "af099f739b9a1658d185ac3cd85b887506f47bc2857d215b9ec266ba524d2265",
         "columns": [
           "run_id",
           "capacity_id",
@@ -576,7 +580,7 @@
         "rows": 143
       },
       "route_stops": {
-        "checksum": "45c38b884728cf5bbe1f55f71d27a9ce807622311713a87558d9d9451ea68707",
+        "checksum": "32a50c0eea7a93be5b4ac8fa584fe973ba7ebcde97b9b7d1fb8257b3be2d551d",
         "columns": [
           "run_id",
           "stop_id",
@@ -593,6 +597,8 @@
           "actual_departure",
           "wait_minutes",
           "service_minutes",
+          "actual_wait_minutes",
+          "actual_service_minutes",
           "demand_units",
           "weight_kg",
           "status"
@@ -602,7 +608,7 @@
         "rows": 118
       },
       "routes": {
-        "checksum": "24845d4d4bee7af6ec7af7e786df9f6f255b786ba658b36ae36f2f66fbf0536d",
+        "checksum": "b6c699935a13b5020b081e32d3088f73734b9fbc825f0e8ac51a4ed469a72ae8",
         "columns": [
           "run_id",
           "route_id",
@@ -628,6 +634,8 @@
           "travel_minutes",
           "service_minutes",
           "wait_minutes",
+          "actual_service_minutes",
+          "actual_wait_minutes",
           "solver_status",
           "objective_value",
           "solve_seconds",
@@ -736,7 +744,7 @@
     },
     "reports": {
       "reconciliation_checks": {
-        "checksum": "2f6b6b466ab59bce0682356ca2c4e3967553627868d41a10abf43b5c35af6374",
+        "checksum": "3032d6a906963fbd3fc03b0c8a51472a1eb25a5a9f696703d7c2f77530f3d3f9",
         "columns": [
           "run_id",
           "check_name",
@@ -748,10 +756,10 @@
         ],
         "csv": "reports/reconciliation_checks.csv",
         "parquet": "reports/reconciliation_checks.parquet",
-        "rows": 15
+        "rows": 17
       },
       "report_metrics": {
-        "checksum": "c92e6513c4b7a8d14eb17e4b0735107241065fc5d882dcd9eefbcced87030793",
+        "checksum": "0749b1b95ff62af9016f2215b506fedbe5603b2f7446ca4aba991a24ff93d833",
         "columns": [
           "run_id",
           "category",
@@ -765,7 +773,7 @@
         ],
         "csv": "reports/report_metrics.csv",
         "parquet": "reports/report_metrics.parquet",
-        "rows": 114
+        "rows": 116
       }
     },
     "simulation": {
@@ -900,7 +908,7 @@
         "rows": 143
       },
       "route_stops": {
-        "checksum": "10bf1818f3bc5cd87681da58e3f682b60b51db97e93b609e953277b10fc5fcec",
+        "checksum": "84ccd55b015577b6277924453b758d194ee6c5abe0f9c6e0596db2b93a0959d8",
         "columns": [
           "run_id",
           "stop_id",
@@ -917,6 +925,8 @@
           "actual_departure",
           "wait_minutes",
           "service_minutes",
+          "actual_wait_minutes",
+          "actual_service_minutes",
           "demand_units",
           "weight_kg",
           "status"
@@ -926,7 +936,7 @@
         "rows": 118
       },
       "routes": {
-        "checksum": "ca69b9aa00d536499a87dd88a29e78ea4f824aafca87cfaf096f482168041755",
+        "checksum": "766148dd3f5fe134d4734a7a4c22670bf2d62d036aad04ad431f2306ef0c8e8c",
         "columns": [
           "run_id",
           "route_id",
@@ -952,6 +962,8 @@
           "travel_minutes",
           "service_minutes",
           "wait_minutes",
+          "actual_service_minutes",
+          "actual_wait_minutes",
           "solver_status",
           "objective_value",
           "solve_seconds",
@@ -965,7 +977,7 @@
     },
     "validation": {
       "clean_issues": {
-        "checksum": "51e6e99d3fd8b77307f00fb4b3fe74685cbd634702b1cdbc60887392e033d32a",
+        "checksum": "173e856a4b75a432eaecaa96d5c54f86beb6bb930b74c7ba54894363295f4729",
         "columns": [
           "run_id",
           "issue_id",
@@ -982,10 +994,10 @@
         ],
         "csv": "validation/clean_issues.csv",
         "parquet": "validation/clean_issues.parquet",
-        "rows": 0
+        "rows": 2
       },
       "dirty_issues": {
-        "checksum": "ee6074f5bc9b214af31c785cbc03a259499781b2564f0ca364ba96d501842c3a",
+        "checksum": "4cddc4f06a791331d488b73228c8ecf040f84fe61de845bcce04dfd6d9bbd7e3",
         "columns": [
           "run_id",
           "issue_id",
@@ -1002,10 +1014,10 @@
         ],
         "csv": "validation/dirty_issues.csv",
         "parquet": "validation/dirty_issues.parquet",
-        "rows": 40
+        "rows": 44
       },
       "dirty_quarantine_records": {
-        "checksum": "c58565fe90637a0629b49426fc2bb9f8aac2676a9d2b2dad008100627a5bc29e",
+        "checksum": "c4a354115b7c7c2dfb58f3a4a4de33ef204250dd8a0c8f8a57a3a3ab5166e603",
         "columns": [
           "run_id",
           "quarantine_id",
@@ -1039,15 +1051,15 @@
     }
   },
   "tested_stage_durations_seconds": {
-    "detect_anomalies": 0.0287,
-    "generate": 0.3222,
-    "inject_anomalies": 0.1253,
-    "persist": 1.0581,
-    "plan": 35.0724,
-    "reporting": 0.0376,
-    "simulate": 0.0526,
-    "validate_clean": 0.3294,
-    "validate_dirty": 0.3435
+    "detect_anomalies": 0.029,
+    "generate": 0.292,
+    "inject_anomalies": 0.1401,
+    "persist": 1.5013,
+    "plan": 35.094,
+    "reporting": 0.0414,
+    "simulate": 0.0567,
+    "validate_clean": 0.3773,
+    "validate_dirty": 0.3648
   },
   "warehouse_path": "fleetmind.duckdb",
   "warehouse_table_counts": {
@@ -1055,7 +1067,7 @@
     "anomaly_detections": 12,
     "audit_records": 10,
     "customer_sites": 40,
-    "data_quality_issues": 40,
+    "data_quality_issues": 46,
     "deliveries": 120,
     "delivery_assignments": 120,
     "delivery_events": 592,
@@ -1070,8 +1082,8 @@
     "ground_truth_anomalies": 12,
     "orders": 120,
     "quarantine_records": 24,
-    "reconciliation_checks": 15,
-    "report_metrics": 114,
+    "reconciliation_checks": 17,
+    "report_metrics": 116,
     "route_events": 591,
     "route_legs": 143,
     "route_stops": 118,

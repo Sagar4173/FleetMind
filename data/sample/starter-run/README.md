@@ -16,7 +16,9 @@ and Faker; it does not describe real people, companies, or locations.
 - `plan/` contains the generated routes, stops, legs, assignments, and solver runs.
 - `simulation/` contains the post-execution versions of routes, stops, legs, deliveries,
   orders, outcomes, and event streams. Assignments remain in `plan/` because execution does
-  not rewrite them. Checksums in `checksums.json` describe the final version of each table:
+  not rewrite them. Routes and stops carry both planned dwell (`wait_minutes`,
+  `service_minutes`) and executed dwell (`actual_wait_minutes`, `actual_service_minutes`).
+  Checksums in `checksums.json` describe the final version of each table:
   the `simulation/` copy where execution supersedes planning or master data, otherwise the
   `plan/` or `master/` copy. `quarantine_dirty/` holds the quarantined copies of dirty rows
   and is not part of the 21 clean-table checksums.

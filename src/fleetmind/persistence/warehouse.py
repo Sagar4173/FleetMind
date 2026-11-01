@@ -15,6 +15,7 @@ from fleetmind.persistence.schema import (
     SCHEMA_VERSION,
     SPECS_BY_NAME,
     TABLE_SPECS,
+    duckdb_type,
     render_schema,
 )
 
@@ -84,6 +85,7 @@ class Warehouse:
         if self.read_only:
             raise WarehouseError("cannot initialize a read-only warehouse")
         self.connection.execute(render_schema())
+        self._migrate_added_columns()
         self.connection.execute(
             "CREATE TABLE IF NOT EXISTS schema_info ("
             "schema_version VARCHAR PRIMARY KEY, created_at TIMESTAMP)"
@@ -93,6 +95,31 @@ class Warehouse:
             "ON CONFLICT DO NOTHING",
             [SCHEMA_VERSION],
         )
+
+    def _migrate_added_columns(self) -> None:
+        """Add columns introduced by a newer schema to an existing warehouse.
+
+        The schema is additive: existing run snapshots keep their meaning, and
+        new nullable columns are backfilled as NULL for older rows. This keeps
+        a warehouse created by an earlier FleetMind version usable without
+        deleting evidence.
+        """
+        for spec in TABLE_SPECS:
+            existing = {
+                str(row[1])
+                for row in self.connection.execute(
+                    f'PRAGMA table_info("{spec.name}")'
+                ).fetchall()
+            }
+            if not existing:
+                continue
+            for field_name, field in spec.model.model_fields.items():
+                if field_name == "run_id" or field_name in existing:
+                    continue
+                self.connection.execute(
+                    f'ALTER TABLE "{spec.name}" ADD COLUMN IF NOT EXISTS '
+                    f'"{field_name}" {duckdb_type(field.annotation)}'
+                )
 
     # ------------------------------------------------------------------
     # Writes

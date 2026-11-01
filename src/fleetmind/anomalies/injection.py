@@ -318,9 +318,14 @@ class AnomalyInjector:
             row["actual_arrival"] = pd.NaT
             row["actual_service_start"] = pd.NaT
             row["actual_departure"] = pd.NaT
+            row["actual_wait_minutes"] = float("nan")
+            row["actual_service_minutes"] = float("nan")
             row["wait_minutes"] = 0.0
             duplicated_stop_ids.add(new_stop_id)
-            stops = pd.concat([stops, pd.DataFrame([row])], ignore_index=True)
+            # Match the existing column dtypes so the all-NA actual-dwell
+            # values do not trigger pandas' mixed-dtype concat warning.
+            new_row = pd.DataFrame([row]).astype(stops.dtypes.to_dict())
+            stops = pd.concat([stops, new_row], ignore_index=True)
             route_loads[route_id] = route_loads.get(route_id, 0.0) + float(
                 row["demand_units"]
             )
@@ -501,13 +506,17 @@ class AnomalyInjector:
         tables: dict[str, pd.DataFrame], stops: pd.DataFrame
     ) -> None:
         routes = tables["routes"]
-        aggregates = stops.groupby(stops["route_id"].astype(str)).agg(
-            stop_count=("stop_id", "count"),
-            load_units=("demand_units", "sum"),
-            load_weight_kg=("weight_kg", "sum"),
-            service_minutes=("service_minutes", "sum"),
-            wait_minutes=("wait_minutes", "sum"),
-        )
+        aggregations: dict[str, tuple[str, str]] = {
+            "stop_count": ("stop_id", "count"),
+            "load_units": ("demand_units", "sum"),
+            "load_weight_kg": ("weight_kg", "sum"),
+            "service_minutes": ("service_minutes", "sum"),
+            "wait_minutes": ("wait_minutes", "sum"),
+        }
+        for column in ("actual_service_minutes", "actual_wait_minutes"):
+            if column in stops.columns:
+                aggregations[column] = (column, "sum")
+        aggregates = stops.groupby(stops["route_id"].astype(str)).agg(**aggregations)
         for index, route in routes.iterrows():
             route_id = str(route["route_id"])
             if route_id not in aggregates.index:
@@ -524,6 +533,12 @@ class AnomalyInjector:
             routes.loc[index, "wait_minutes"] = round(
                 float(aggregate["wait_minutes"]), 2
             )
+            for column in ("actual_service_minutes", "actual_wait_minutes"):
+                if column in routes.columns and column in aggregates.columns:
+                    value = aggregate[column]
+                    routes.loc[index, column] = (
+                        round(float(value), 6) if pd.notna(value) else None
+                    )
         tables["route_stops"] = stops
 
 
