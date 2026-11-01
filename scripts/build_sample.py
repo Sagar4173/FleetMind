@@ -44,9 +44,12 @@ and Faker; it does not describe real people, companies, or locations.
 - `master/` contains the pre-execution master snapshot. `deliveries.status` is `PENDING`
   and `orders.status` is `CONFIRMED`.
 - `plan/` contains the generated routes, stops, legs, assignments, and solver runs.
-- `simulation/` contains the post-execution versions of routes, stops, legs, assignments,
-  deliveries, orders, outcomes, and event streams. Checksums in `checksums.json` describe
-  these final versions where an execution table supersedes its planning/master version.
+- `simulation/` contains the post-execution versions of routes, stops, legs, deliveries,
+  orders, outcomes, and event streams. Assignments remain in `plan/` because execution does
+  not rewrite them. Checksums in `checksums.json` describe the final version of each table:
+  the `simulation/` copy where execution supersedes planning or master data, otherwise the
+  `plan/` or `master/` copy. `quarantine_dirty/` holds the quarantined copies of dirty rows
+  and is not part of the 21 clean-table checksums.
 - `anomalies/`, `validation/`, `quarantine_dirty/`, and `reports/` contain the anomaly
   ground truth, detections, dirty snapshot issues, quarantine evidence, and reconciliation
   output.
