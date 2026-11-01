@@ -1,8 +1,8 @@
 run_id,solve_id,service_date,status,objective_value,solve_seconds,assigned_count,unserved_count,vehicle_count,message
-RUN-C16424724715,SOL-2026-000001,2026-11-02,FEASIBLE,529533.0,5.0191,18,0,5,OR-Tools status 1; vehicles used 5; dropped nodes 0
-RUN-C16424724715,SOL-2026-000002,2026-11-03,FEASIBLE,415472.0,5.0029,17,0,4,OR-Tools status 1; vehicles used 4; dropped nodes 0
-RUN-C16424724715,SOL-2026-000003,2026-11-04,FEASIBLE,343688.0,5.0023,17,0,3,OR-Tools status 1; vehicles used 3; dropped nodes 0
-RUN-C16424724715,SOL-2026-000004,2026-11-05,FEASIBLE,445497.0,5.0028,17,0,4,OR-Tools status 1; vehicles used 4; dropped nodes 0
-RUN-C16424724715,SOL-2026-000005,2026-11-06,FEASIBLE,378923.0,5.0022,17,0,3,OR-Tools status 1; vehicles used 3; dropped nodes 0
-RUN-C16424724715,SOL-2026-000006,2026-11-07,FEASIBLE,345207.0,5.0027,15,2,3,OR-Tools status 1; vehicles used 3; dropped nodes 0
-RUN-C16424724715,SOL-2026-000007,2026-11-08,FEASIBLE,323479.0,5.0033,17,0,3,OR-Tools status 1; vehicles used 3; dropped nodes 0
+RUN-C16424724715,SOL-2026-000001,2026-11-02,FEASIBLE,529533.0,5.0219,18,0,5,OR-Tools status 1; vehicles used 5; dropped nodes 0
+RUN-C16424724715,SOL-2026-000002,2026-11-03,FEASIBLE,415472.0,5.0048,17,0,4,OR-Tools status 1; vehicles used 4; dropped nodes 0
+RUN-C16424724715,SOL-2026-000003,2026-11-04,FEASIBLE,343688.0,5.0028,17,0,3,OR-Tools status 1; vehicles used 3; dropped nodes 0
+RUN-C16424724715,SOL-2026-000004,2026-11-05,FEASIBLE,445497.0,5.003,17,0,4,OR-Tools status 1; vehicles used 4; dropped nodes 0
+RUN-C16424724715,SOL-2026-000005,2026-11-06,FEASIBLE,378923.0,5.002,17,0,3,OR-Tools status 1; vehicles used 3; dropped nodes 0
+RUN-C16424724715,SOL-2026-000006,2026-11-07,FEASIBLE,345207.0,5.0023,15,2,3,OR-Tools status 1; vehicles used 3; dropped nodes 0
+RUN-C16424724715,SOL-2026-000007,2026-11-08,FEASIBLE,323479.0,5.0025,17,0,3,OR-Tools status 1; vehicles used 3; dropped nodes 0

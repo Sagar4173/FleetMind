@@ -107,6 +107,7 @@ def _summarise_stages(run: PipelineRun, orchestration_seconds: float) -> dict[st
             "generate",
             "plan",
             "simulate",
+            "reporting",
             "validate_clean",
             "inject_anomalies",
             "detect_anomalies",
@@ -114,7 +115,6 @@ def _summarise_stages(run: PipelineRun, orchestration_seconds: float) -> dict[st
             "persist",
         )
     )
-    stages["orchestration"] = round(orchestration_seconds, 4)
     stages["measured_sum"] = round(measured, 4)
     stages["total"] = round(orchestration_seconds, 4)
     return stages
@@ -136,12 +136,14 @@ def _benchmark_config(
     started = time.perf_counter()
     monitor.start()
     run = build_pipeline_run(config, include_anomalies=True)
+    persist_started = time.perf_counter()
     paths = persist_pipeline_run(
         run,
         run_output,
         warehouse_path=db_path,
         artifact_formats=artifact_formats,
     )
+    persist_wall_seconds = time.perf_counter() - persist_started
     orchestration_seconds = time.perf_counter() - started
     current_bytes, python_peak_bytes = tracemalloc.get_traced_memory()
     tracemalloc.stop()
@@ -162,29 +164,61 @@ def _benchmark_config(
     }
     throughput = {
         "deliveries_per_second": round(
-            counts["deliveries"] / stages["orchestration"], 3
+            counts["deliveries"] / stages["total"], 3
         )
-        if stages["orchestration"]
+        if stages["total"]
         else 0.0,
         "diagnostics_rows_per_second": round(
-            sum(counts.values()) / stages["orchestration"], 3
+            sum(counts.values()) / stages["total"], 3
         )
-        if stages["orchestration"]
+        if stages["total"]
         else 0.0,
-        "solver_seconds": round(float(run.plan.solve_seconds), 4),
+    }
+    solver_runs = run.plan.tables.get("solver_runs", pd.DataFrame())
+    if len(solver_runs):
+        solver_seconds = float(
+            pd.to_numeric(solver_runs["solve_seconds"], errors="coerce")
+            .fillna(0.0)
+            .sum()
+        )
+    else:
+        solver_seconds = 0.0
+    planning_seconds = float(run.stage_durations.get("plan", 0.0))
+    finalization_seconds = max(
+        0.0, persist_wall_seconds - float(stages.get("persist", 0.0))
+    )
+    timing = {
+        "planning_seconds": round(planning_seconds, 4),
+        "solver_seconds": round(solver_seconds, 4),
         "solver_seconds_per_day": round(
-            float(run.plan.solve_seconds) / max(1, config.horizon.days), 4
+            solver_seconds / max(1, config.horizon.days), 4
+        ),
+        "solver_run_count": int(len(solver_runs)),
+        "persist_total_seconds": round(persist_wall_seconds, 4),
+        "persist_stage_seconds": round(float(stages.get("persist", 0.0)), 4),
+        "finalization_seconds": round(finalization_seconds, 4),
+        "total_seconds": stages["total"],
+        "measured_stage_seconds": stages["measured_sum"],
+        "unattributed_seconds": round(
+            max(
+                0.0,
+                stages["total"]
+                - float(stages["measured_sum"])
+                - finalization_seconds,
+            ),
+            4,
         ),
     }
     return {
         "config": config.run_id,
         "run_id": config.run_id,
-        "config_file": str(config.config_hash()),
+        "config_hash": config.config_hash(),
         "status": run.status,
         "seed": config.seed,
         "days": config.horizon.days,
         "solver_time_limit_seconds": config.routing.time_limit_seconds,
         "stages": stages,
+        "timing": timing,
         "throughput": throughput,
         "memory": {
             "start_rss_mb": monitor.start_mb,
@@ -265,6 +299,32 @@ def _markdown(report: dict[str, Any]) -> str:
     lines.extend(
         [
             "",
+            "## Timing",
+            "",
+            "| Config | Planning (s) | Solver (s) | Solver s/day | Total (s) | Measured stages (s) | Finalization (s) | Unattributed (s) |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|",
+        ]
+    )
+    for item in report["results"]:
+        if item.get("status") == "FAILED":
+            continue
+        timing = item["timing"]
+        lines.append(
+            "| {config} | {planning:.2f} | {solver:.2f} | {solver_day:.3f} | "
+            "{total:.2f} | {measured:.2f} | {finalize:.2f} | {unattributed:.2f} |".format(
+                config=item["config"],
+                planning=timing["planning_seconds"],
+                solver=timing["solver_seconds"],
+                solver_day=timing["solver_seconds_per_day"],
+                total=timing["total_seconds"],
+                measured=timing["measured_stage_seconds"],
+                finalize=timing["finalization_seconds"],
+                unattributed=timing["unattributed_seconds"],
+            )
+        )
+    lines.extend(
+        [
+            "",
             "## Quality and throughput",
             "",
             "| Config | Routes | Delivered | Service | On-time | Solver s/day | Deliveries/s | Mean anomaly F1 |",
@@ -276,6 +336,7 @@ def _markdown(report: dict[str, Any]) -> str:
             continue
         quality = item["quality"]
         throughput = item["throughput"]
+        timing = item["timing"]
         f1 = quality.get("anomaly_detection_mean_f1")
         lines.append(
             "| {config} | {routes} | {delivered} | {service:.1%} | {on_time:.1%} | "
@@ -285,7 +346,7 @@ def _markdown(report: dict[str, Any]) -> str:
                 delivered=quality["delivered_deliveries"],
                 service=quality["service_rate"],
                 on_time=quality["on_time_rate"],
-                solver_day=throughput["solver_seconds_per_day"],
+                solver_day=timing["solver_seconds_per_day"],
                 dps=throughput["deliveries_per_second"],
                 f1="n/a" if f1 is None else f"{f1:.3f}",
             )
@@ -300,8 +361,11 @@ def _markdown(report: dict[str, Any]) -> str:
             "",
             "## Method",
             "",
-            "- One cold measurement per configuration on the same machine; no warm-up run.",
-            "- Stage durations are emitted by the pipeline itself and include full validation, anomaly injection/detection, and both parquet and CSV artifact writes.",
+            "- One measured run per configuration on the same machine; no warm-up run. Configurations run sequentially in one Python process, so later runs may benefit from warm OS and library caches.",
+            "- `planning_seconds` is the full planning stage: deterministic pre-checks, model construction, solver search, and result assembly across all service days.",
+            "- `solver_seconds` is the sum of the per-day `solver_runs.solve_seconds` values actually persisted by the planner, not the full planning stage.",
+            "- `finalization_seconds` covers checksum regeneration, metadata/warehouse upserts, summary writing, and manifest construction after the timed persist stage.",
+            "- `unattributed_seconds` is total wall time minus measured stages and finalization; it covers benchmark harness work such as report writing.",
             "- Peak RSS is sampled every 50 ms by a background thread; Python allocation peak uses tracemalloc.",
             "- Solver wall time is subject to OR-Tools search limits configured per day in YAML.",
             "",

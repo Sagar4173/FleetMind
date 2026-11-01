@@ -101,7 +101,7 @@
     ]
   },
   "artifacts": {
-    "checksums": "outputs\\verification-artifacts\\RUN-C16424724715\\checksums.json",
+    "checksums": "checksums.json",
     "groups": [
       "anomalies",
       "master",
@@ -111,7 +111,7 @@
       "simulation",
       "validation"
     ],
-    "run_directory": "outputs\\verification-artifacts\\RUN-C16424724715"
+    "run_directory": "."
   },
   "checksums": {
     "clean": {
@@ -161,7 +161,7 @@
       "vehicles": "fc103b24b0eacf1bddcc4a1e80a13b6c51f4a3df2dae6afa815e92d03cbe4044"
     }
   },
-  "completed_at": "2026-10-31T17:40:33",
+  "completed_at": "2026-11-01T01:20:30",
   "config_hash": "c16424724715e796adbacc00f7480d36e6faa59964766d0bf9835d5ce19a74aa",
   "counts": {
     "anomaly_detections": 12,
@@ -356,16 +356,17 @@
   "run_id": "RUN-C16424724715",
   "seed": 20261022,
   "stage_durations_seconds": {
-    "detect_anomalies": 0.0268,
-    "generate": 0.2937,
-    "inject_anomalies": 0.1191,
-    "persist": 0.9537,
-    "plan": 35.0639,
-    "simulate": 0.053,
-    "validate_clean": 0.3226,
-    "validate_dirty": 0.3331
+    "detect_anomalies": 0.0287,
+    "generate": 0.3222,
+    "inject_anomalies": 0.1253,
+    "persist": 1.0581,
+    "plan": 35.0724,
+    "reporting": 0.0376,
+    "simulate": 0.0526,
+    "validate_clean": 0.3294,
+    "validate_dirty": 0.3435
   },
-  "started_at": "2026-10-31T17:39:55",
+  "started_at": "2026-11-01T01:19:53",
   "status": "SUCCEEDED",
   "validation": {
     "clean_by_type": {},
@@ -385,7 +386,8 @@
     "dirty_passed": false
   },
   "warehouse": {
-    "path": "outputs\\verification.duckdb",
+    "included": false,
+    "path": "fleetmind.duckdb",
     "table_counts": {
       "anomaly_detection_metrics": 6,
       "anomaly_detections": 12,

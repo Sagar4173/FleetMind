@@ -132,6 +132,13 @@ def test_artifacts_are_written_in_both_formats(tiny_persisted) -> None:
     assert summary["validation"]["clean_passed"] is True
     assert summary["anomalies"]["detected"] == 6
     assert "warehouse_table_counts" in manifest
+    assert summary["artifacts"]["run_directory"] == "."
+    assert summary["artifacts"]["checksums"] == "checksums.json"
+    deliveries_entry = manifest["table_groups"]["master"]["deliveries"]
+    for output_format in ("parquet", "csv"):
+        relative = Path(deliveries_entry[output_format])
+        assert not relative.is_absolute()
+        assert (paths.run_directory / relative).is_file()
 
 
 def test_artifacts_are_byte_stable_for_business_tables(tiny_pipeline) -> None:

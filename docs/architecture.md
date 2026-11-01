@@ -113,6 +113,19 @@ entity key (for example `("run_id", "route_id")`). Two runs can coexist in one d
 The pipeline purposely writes evidence before raising for validation problems. A failed run is an observable result,
 not an empty directory.
 
+### Why a clean simulation can fail
+
+A clean (non-injected) simulation can legitimately exceed a driver shift when execution variance is high enough:
+dispatch delays, travel-time variance, and service-time variance all consume the slack that planning reserved
+(`routing.execution_buffer_minutes` plus `break_minutes`). When a route's `actual_end` passes the shift's
+`planned_end`, validation emits `DRIVER_SHIFT_EXCEEDED` with `CRITICAL` severity. The run becomes `FAILED` with an
+explicit `clean snapshot failed validation ...` error; this is a real operational finding, not a validator defect.
+
+Because anomaly injection requires a validated clean snapshot, the pipeline skips anomaly injection, detection, and
+dirty validation for a `FAILED` run. Clean validation issues, artifacts, and the warehouse snapshot are still written
+so the overrun can be investigated. With the default 30-minute buffer and moderate variance this is rare; zero buffer
+and deliberately high variance make it reproducible (see `tests/integration/test_routing_simulation.py`).
+
 ## Dashboard boundary
 
 The dashboard is a separate read-only consumer. It opens DuckDB with `read_only=True`, selects a run from

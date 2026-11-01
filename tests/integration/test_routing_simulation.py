@@ -21,6 +21,7 @@ from fleetmind.models.enums import (
     OutcomeStatus,
     VehicleType,
 )
+from fleetmind.pipeline import build_pipeline_run
 from fleetmind.routing.optimizer import build_plan
 from fleetmind.simulation.engine import simulate_execution
 from fleetmind.validation.engine import validate_full
@@ -49,6 +50,67 @@ def tiny_config(
         simulation=SimulationConfig(customer_unavailable_base_rate=0.0),
         reporting=ReportingConfig(),
     )
+
+
+def variance_config(
+    *,
+    seed: int,
+    orders: int,
+    vehicles: int,
+    sites: int,
+    execution_buffer_minutes: int,
+    simulation: dict,
+) -> AppConfig:
+    return AppConfig(
+        seed=seed,
+        horizon=HorizonConfig(start_date=date(2026, 11, 2), days=1),
+        generation=GenerationConfig(
+            customer_sites=sites,
+            orders=orders,
+            vehicles=vehicles,
+            drivers=vehicles,
+            site_active_ratio=1.0,
+            shift_availability_weekday=1.0,
+            shift_availability_weekend=1.0,
+            handling_mix={HandlingClass.AMBIENT: 1.0},
+            fleet_mix={VehicleType.BOX_TRUCK: 1.0},
+        ),
+        routing=RoutingConfig(
+            time_limit_seconds=1,
+            execution_buffer_minutes=execution_buffer_minutes,
+            max_stops_per_route=20,
+        ),
+        simulation=SimulationConfig(
+            customer_unavailable_base_rate=0.0, **simulation
+        ),
+        reporting=ReportingConfig(),
+    )
+
+
+def run_variance_scenario(
+    *,
+    seed: int,
+    orders: int,
+    vehicles: int,
+    sites: int,
+    execution_buffer_minutes: int = 0,
+    simulation: dict,
+):
+    config = variance_config(
+        seed=seed,
+        orders=orders,
+        vehicles=vehicles,
+        sites=sites,
+        execution_buffer_minutes=execution_buffer_minutes,
+        simulation=simulation,
+    )
+    dataset = generate_dataset(config)
+    plan = build_plan(dataset, config)
+    simulation_result = simulate_execution(dataset, plan.tables, config)
+    tables = dataset.copy_tables()
+    tables.update(plan.tables)
+    tables.update(simulation_result.tables)
+    return config, dataset, plan, simulation_result, validate_full(tables, config)
 
 
 @pytest.fixture(scope="module")
@@ -193,3 +255,149 @@ def test_unserved_deliveries_get_explicit_outcomes_and_reasons() -> None:
     tables.update(simulation.tables)
     result = validate_full(tables, config)
     assert result.passed, result.issues.to_string()
+
+
+@pytest.mark.parametrize(
+    ("scenario", "seed", "orders", "vehicles", "sites", "buffer", "simulation"),
+    [
+        (
+            "high_dispatch_delay",
+            5,
+            14,
+            1,
+            8,
+            0,
+            {"dispatch_delay_max_minutes": 120},
+        ),
+        (
+            "high_travel_variance",
+            13,
+            30,
+            2,
+            10,
+            0,
+            {"travel_variance_pct": 0.5},
+        ),
+        (
+            "high_service_variance",
+            7,
+            12,
+            1,
+            8,
+            0,
+            {"service_variance_pct": 0.5},
+        ),
+        (
+            "natural_overrun_at_default_buffer",
+            5,
+            14,
+            1,
+            8,
+            30,
+            {
+                "dispatch_delay_max_minutes": 120,
+                "travel_variance_pct": 0.5,
+                "service_variance_pct": 0.5,
+            },
+        ),
+    ],
+)
+def test_high_variance_overrun_is_a_critical_validation_failure(
+    scenario: str,
+    seed: int,
+    orders: int,
+    vehicles: int,
+    sites: int,
+    buffer: int,
+    simulation: dict,
+) -> None:
+    _, _, _, simulation_result, validation = run_variance_scenario(
+        seed=seed,
+        orders=orders,
+        vehicles=vehicles,
+        sites=sites,
+        execution_buffer_minutes=buffer,
+        simulation=simulation,
+    )
+    overruns = validation.issues[
+        validation.issues["issue_type"] == "DRIVER_SHIFT_EXCEEDED"
+    ]
+    assert len(overruns) >= 1, f"{scenario} did not produce a natural overrun"
+    assert set(overruns["severity"]) == {"CRITICAL"}
+    assert not validation.passed
+    assert validation.critical_count >= len(overruns)
+
+    routes = simulation_result.tables["routes"].set_index("route_id")
+    stops = simulation_result.tables["route_stops"]
+    for route_id in overruns["entity_id"]:
+        route = routes.loc[route_id]
+        planned_end = stops.loc[
+            stops["route_id"] == route_id, "planned_departure"
+        ]
+        assert not planned_end.empty
+        assert pd.Timestamp(route["actual_end"]) > pd.Timestamp(
+            planned_end.iloc[-1]
+        )
+
+
+def test_zero_execution_buffer_allows_overrun_that_a_larger_buffer_absorbs() -> None:
+    # The default 30-minute buffer is deliberately not used as the control: the
+    # high-variance case above already shows that it cannot absorb every natural
+    # overrun. A 120-minute buffer leaves enough planning slack for this scenario.
+    _, _, _, _, zero_buffer_validation = run_variance_scenario(
+        seed=13,
+        orders=30,
+        vehicles=2,
+        sites=10,
+        execution_buffer_minutes=0,
+        simulation={"travel_variance_pct": 0.5},
+    )
+    zero_overruns = zero_buffer_validation.issues[
+        zero_buffer_validation.issues["issue_type"] == "DRIVER_SHIFT_EXCEEDED"
+    ]
+    assert len(zero_overruns) >= 1
+    assert not zero_buffer_validation.passed
+
+    _, _, _, _, buffered_validation = run_variance_scenario(
+        seed=13,
+        orders=30,
+        vehicles=2,
+        sites=10,
+        execution_buffer_minutes=120,
+        simulation={"travel_variance_pct": 0.5},
+    )
+    buffered_overruns = buffered_validation.issues[
+        buffered_validation.issues["issue_type"] == "DRIVER_SHIFT_EXCEEDED"
+    ]
+    assert buffered_overruns.empty
+    assert buffered_validation.passed
+
+
+def test_clean_overrun_fails_run_and_skips_anomaly_injection() -> None:
+    config = variance_config(
+        seed=5,
+        orders=14,
+        vehicles=1,
+        sites=8,
+        execution_buffer_minutes=30,
+        simulation={
+            "dispatch_delay_max_minutes": 120,
+            "travel_variance_pct": 0.5,
+            "service_variance_pct": 0.5,
+        },
+    )
+    run = build_pipeline_run(config, include_anomalies=True)
+
+    assert run.status == "FAILED"
+    assert run.error_message.startswith("clean snapshot failed validation")
+    assert "critical issue" in run.error_message
+    assert run.anomaly_injection is None
+    assert run.anomaly_evaluation is None
+    assert run.dirty_validation is None
+    assert run.summary()["status"] == "FAILED"
+    assert run.summary()["error_message"] == run.error_message
+
+    actions = set(run.audit_records["action"])
+    assert "PIPELINE_FAILED" in actions
+    assert "ANOMALY_INJECTION_COMPLETED" not in actions
+    assert "DETECTION_COMPLETED" not in actions

@@ -2,7 +2,7 @@
 
 ## Context
 
-The pipeline, warehouse, CLI, and dashboard were working. The remaining assessment requirement was evidence: measured
+The pipeline, warehouse, CLI, and dashboard were working. The remaining requirement was evidence: measured
 performance at the required scale, a clean final test run, reviewer-facing documentation, a checked-in sample run, and
 an honest record of limitations.
 
@@ -20,16 +20,21 @@ an honest record of limitations.
 
 - `benchmarks.py` calls the same `build_pipeline_run` and `persist_pipeline_run` used by the CLI. It does not use a
   reduced or mocked pipeline.
-- Stage timers cover generation, planning, simulation, clean validation, injection, detection, dirty validation, and
-  persistence. Orchestration wall time is measured around build + persist.
-- Solver seconds come from `solver_runs.solve_seconds`; solver seconds per day normalizes across horizons.
-- Throughput is deliveries divided by orchestration seconds. Diagnostic rows per second uses the selected table row
-  counts.
+- Stage timers cover generation, planning, simulation, reporting, clean validation, injection, detection, dirty
+  validation, and persistence. Total wall time is measured around build + persist.
+- `planning_seconds` is the full planning stage. Solver seconds are the sum of the per-day
+  `solver_runs.solve_seconds` values actually persisted by the planner; solver seconds per day normalizes across
+  horizons. The earlier implementation conflated the two metrics, so the benchmark was corrected and rerun.
+- `finalization_seconds` captures run metadata, warehouse metadata upserts, repeated checksum computation, summary
+  writing, and manifest construction after the timed persist stage. `unattributed_seconds` exposes the remaining
+  harness cost instead of hiding it.
+- Throughput is deliveries divided by total wall time. Diagnostic rows per second uses the selected table row counts.
 - Peak RSS is sampled by a daemon thread every 50 ms with `psutil`; Python allocation peak is captured with
   `tracemalloc`.
 - A failed configuration is recorded with `status=FAILED` and an error message; the suite continues and still writes
   the report.
-- One cold run per configuration is recorded. The report states `repeats=1` and does not average or discard outliers.
+- One measured run per configuration is recorded. The report states `repeats=1` and does not average or discard
+  outliers. Configurations run sequentially in one process, so later runs benefit from warm OS/library caches.
 
 ### Documentation
 
@@ -49,11 +54,14 @@ an honest record of limitations.
 
 ### Checked-in evidence
 
-- `data/sample/starter-run/` contains a 27-file CSV/JSON starter run: config, summary, checksums, master/plan/
-  simulation tables, anomaly evidence, validation issues, and reports. The DuckDB file and Parquet files are not
-  committed.
+- `data/sample/starter-run/` contains a complete 91-file starter run: all 21 checksummed tables in Parquet and CSV,
+  pre-execution master snapshots, final simulation snapshots, anomaly evidence, validation issues, quarantine
+  evidence, reports, `manifest.json`, `checksums.json`, `config.yaml`, and `summary.json`. The DuckDB file is not
+  committed and the sample is marked as not warehouse-loadable.
 - `outputs/benchmarks/benchmark_report.json` and `.md` are force-included despite the normal `outputs/` ignore rule.
-  The ignore rule was narrowed to ignore `outputs/*` but unignore the two report files.
+  The ignore rule was narrowed to ignore `outputs/*` but unignore the two report files and the `history/` archive.
+- The 2026-10-31 pre-remediation benchmark report is preserved under `outputs/benchmarks/history/`; the current report
+  is a fresh rerun with corrected timing definitions.
 
 ### Verification fix
 
@@ -71,7 +79,7 @@ an honest record of limitations.
 python -m pytest -q
 ```
 
-Result: **86 passed, 3 warnings in 39.55s**. The three warnings are OR-Tools SWIG deprecation notices.
+Result: **104 passed, 3 warnings in 48.76s**. The three warnings are OR-Tools SWIG deprecation notices.
 
 The suite covers generation counts, ID formats, referential integrity, geography/travel, configuration extends and
 validation, OR-Tools constraints, unserved reasons, simulation outcomes and events, all six anomaly injectors and
@@ -92,8 +100,8 @@ Result: `RUN-C16424724715`, `SUCCEEDED`, `FULL`.
 - 15/15 reconciliation checks passed.
 - 12 ground truths, 12 detections, mean anomaly F1 1.000.
 - 40 dirty validation issues and 24 dirty quarantine records.
-- Stage timings: generate 0.27 s, plan 35.06 s, simulate 0.06 s, validate clean 0.35 s, inject 0.13 s, detect 0.03 s,
-  validate dirty 0.37 s, persist 0.99 s.
+- Stage timings: generate 0.28 s, plan 35.06 s, simulate 0.05 s, validate clean 0.33 s, reporting 0.04 s, inject
+  0.12 s, detect 0.03 s, validate dirty 0.33 s, persist 1.01 s.
 
 The same command was rerun against the same warehouse. `run_metadata` still had one row, along with 25 routes, 120
 deliveries, 12 ground truths, and 12 detections. All 21 clean table checksums were identical across the two runs, and
@@ -101,21 +109,26 @@ all 21 checksums were recomputed successfully from the Parquet artifacts.
 
 ### Benchmarks
 
-Report: `outputs/benchmarks/benchmark_report.json` and `.md`, measured 2026-10-31.
+Report: `outputs/benchmarks/benchmark_report.json` and `.md`, measured 2026-11-01. Earlier reports, including the
+2026-10-31 pre-remediation run and the intermediate PyArrow 21 run, are preserved under
+`outputs/benchmarks/history/`.
 
-| Config | Total (s) | Plan (s) | Routes | Assigned | Delivered | Unserved | Service | Peak RSS (MB) | Solver s/day | Mean F1 |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| baseline | 518.34 | 311.50 | 296 | 2,000 | 1,991 | 0 | 99.55% | 445.89 | 10.378 | 1.000 |
-| larger | 953.85 | 481.75 | 521 | 4,000 | 3,984 | 0 | 99.60% | 859.69 | 16.042 | 1.000 |
+| Config | Total (s) | Planning (s) | Solver (s) | Solver s/day | Routes | Assigned | Delivered | Unserved | Service | Peak RSS (MB) | Mean F1 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| baseline | 503.27 | 310.63 | 302.79 | 10.093 | 295 | 2,000 | 1,991 | 0 | 99.55% | 449.42 | 1.000 |
+| larger | 886.07 | 481.11 | 457.65 | 15.255 | 521 | 4,000 | 3,984 | 0 | 99.60% | 865.45 | 1.000 |
 
 Both runs passed clean validation with zero issues, passed all reconciliation checks, and detected every injected
 anomaly. Baseline used 251,001 travel-matrix rows; larger used 564,001. Totals include artifact writes, DuckDB
 persistence, both validation passes, injection, detection, and reporting, so they are not solver-only timings.
+`planning_seconds` is the full planning stage; `solver_seconds` is the sum of the persisted per-day
+`solver_runs.solve_seconds` values. Finalization and unattributed harness time are reported separately in the JSON
+report and `docs/benchmark_methodology.md`.
 
 ## Follow-ups and limitations
 
-- The benchmark is one cold run per configuration, not a distribution. Absolute timings depend on hardware, antivirus
-  scanning, and solver search behavior.
+- The benchmark is one measured run per configuration, not a distribution. Absolute timings depend on hardware,
+  antivirus scanning, and solver search behavior.
 - Travel is a static Haversine model with road and scenario multipliers, not live road-network routing.
 - Planning is one model per service day; multi-day route continuity and multi-depot operation are out of scope.
 - Anomaly detection is rule-based and limited to the six specified classes.

@@ -87,6 +87,11 @@ keeps issue IDs deterministic and avoids collisions when both frames are inspect
 | Completed route timestamps | `INVALID_DATE_ORDER` | `ERROR` | Route actual start/end are ordered. |
 | Delivery status invariants | `INVALID_LIFECYCLE_TRANSITION` | `ERROR` | Planned status, assignment status, and outcome agree. |
 
+`DRIVER_SHIFT_EXCEEDED` is intentionally `CRITICAL` for both the planned and actual checks. High dispatch delay,
+travel variance, or service variance can make a clean run overrun a shift even though planning respected the buffer.
+The pipeline therefore marks that run `FAILED` and skips anomaly injection (which requires a validated clean
+snapshot); clean evidence is still persisted for investigation.
+
 ## Quarantine
 
 A record is quarantined when its issue type is one of:

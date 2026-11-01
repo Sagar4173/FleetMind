@@ -2,8 +2,8 @@
 
 ## Context
 
-Empty repository at `F:\Projects\FleetMind`, no implementation, no Git history. The goal is a YottaFlex AI Associate
-assessment deliverable that must be production-quality, not a notebook demo.
+Empty repository in the project workspace, no implementation, no Git history. The goal is a production-quality
+deliverable, not a notebook demo.
 
 ## Prompt
 
@@ -14,8 +14,8 @@ assessment deliverable that must be production-quality, not a notebook demo.
 > decision. Include a prompt history. Implement, run, test, and verify incrementally; do not stop at planning.
 > Commit milestones but do not push.
 
-Required baseline: 500 sites, 2,000 deliveries, 100 vehicles, 30 days, seed `20261022`. Required stack: Python 3.11+,
-OR-Tools, Pandas, NumPy, Faker, DuckDB, Parquet/CSV, Pydantic, pytest, PyYAML, Streamlit, Plotly.
+Required baseline: 500 sites, 2,000 deliveries, 100 vehicles, 30 days, seed `20261022`. Required stack: Python
+3.11–3.13, OR-Tools, Pandas, NumPy, Faker, DuckDB, Parquet/CSV, Pydantic, pytest, PyYAML, Streamlit, Plotly.
 
 ## Decisions
 

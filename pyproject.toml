@@ -7,7 +7,7 @@ name = "fleetmind"
 version = "1.0.0"
 description = "Deterministic synthetic logistics data engineering and delivery planning platform"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.14"
 license = { text = "MIT" }
 authors = [{ name = "FleetMind Engineering" }]
 dependencies = [
@@ -18,7 +18,7 @@ dependencies = [
   "pandas>=2.2,<2.4",
   "plotly>=6,<7",
   "psutil>=7,<8",
-  "pyarrow>=20,<22",
+  "pyarrow>=23.0.1,<24",
   "pydantic>=2.10,<3",
   "PyYAML>=6,<7",
   "rich>=13,<16",
@@ -28,7 +28,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-  "pytest>=8,<9",
+  "pytest>=9.0.3,<10",
   "pytest-cov>=6,<8",
 ]
 

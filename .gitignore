@@ -19,6 +19,8 @@ outputs/*
 outputs/benchmarks/*
 !outputs/benchmarks/benchmark_report.json
 !outputs/benchmarks/benchmark_report.md
+!outputs/benchmarks/history/
+!outputs/benchmarks/history/*
 *.duckdb
 *.duckdb.wal
 *.log

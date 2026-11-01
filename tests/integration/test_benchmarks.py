@@ -25,6 +25,46 @@ def test_benchmark_suite_writes_measured_report(tiny_pipeline, tmp_path) -> None
     assert item["stages"]["generate"] >= 0
     assert item["stages"]["plan"] > 0
     assert item["stages"]["persist"] > 0
+    assert item["stages"]["reporting"] >= 0
+    assert "orchestration" not in item["stages"]
+
+    timing = item["timing"]
+    assert timing["planning_seconds"] == pytest.approx(item["stages"]["plan"])
+    assert timing["solver_seconds"] > 0
+    assert timing["solver_seconds"] <= timing["planning_seconds"]
+    assert timing["solver_seconds_per_day"] == pytest.approx(
+        timing["solver_seconds"] / item["days"]
+    )
+    assert timing["measured_stage_seconds"] == pytest.approx(
+        sum(
+            item["stages"].get(name, 0.0)
+            for name in (
+                "generate",
+                "plan",
+                "simulate",
+                "reporting",
+                "validate_clean",
+                "inject_anomalies",
+                "detect_anomalies",
+                "validate_dirty",
+                "persist",
+            )
+        )
+    )
+    assert timing["finalization_seconds"] >= 0
+    assert timing["persist_total_seconds"] >= timing["persist_stage_seconds"]
+    assert timing["unattributed_seconds"] == pytest.approx(
+        max(
+            0.0,
+            item["stages"]["total"]
+            - timing["measured_stage_seconds"]
+            - timing["finalization_seconds"],
+        )
+    )
+    assert timing["total_seconds"] == item["stages"]["total"]
+    assert item["config_hash"] == tiny_pipeline.config.config_hash()
+    assert "config_file" not in item
+
     assert item["memory"]["peak_rss_mb"] > 0
     assert item["throughput"]["deliveries_per_second"] > 0
     assert item["quality"]["anomaly_detection_mean_f1"] == 1.0

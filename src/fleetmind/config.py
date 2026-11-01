@@ -131,6 +131,11 @@ class GenerationConfig(StrictModel):
                 raise ValueError(f"{name} values must sum to 1.0")
         if self.drivers < 1:
             raise ValueError("at least one driver is required")
+        if self.drivers > self.vehicles:
+            raise ValueError(
+                "drivers cannot exceed vehicles: the model allows at most one driver "
+                "per vehicle shift, so extra drivers have no assignable vehicle"
+            )
         return self
 
 

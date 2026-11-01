@@ -90,19 +90,26 @@ def artifact_manifest(
     *,
     formats: tuple[str, ...] = ("parquet", "csv"),
 ) -> dict[str, Any]:
-    """Describe row counts, columns and logical checksums for every artifact."""
+    """Describe row counts, columns and logical checksums for every artifact.
+
+    Paths are relative to ``directory`` (the run directory) so the manifest stays
+    valid when a completed run is copied or archived.
+    """
     base = Path(directory)
+    if not base.is_dir():
+        raise ValueError(f"artifact directory does not exist: {base}")
     manifest: dict[str, Any] = {}
     for group, tables in sorted(table_groups.items()):
         entries: dict[str, Any] = {}
         for name, frame in sorted(tables.items()):
+            work = normalize_frame(frame)
             entry: dict[str, Any] = {
-                "rows": int(len(frame)),
-                "columns": [str(column) for column in frame.columns],
-                "checksum": logical_checksum(frame),
+                "rows": int(len(work)),
+                "columns": [str(column) for column in work.columns],
+                "checksum": logical_checksum(work),
             }
             for output_format in formats:
-                entry[output_format] = str(base / group / f"{name}.{output_format}")
+                entry[output_format] = f"{group}/{name}.{output_format}"
             entries[name] = entry
         manifest[group] = entries
     return manifest

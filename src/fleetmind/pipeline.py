@@ -335,8 +335,10 @@ def build_pipeline_run(
         },
     )
 
+    started = time.perf_counter()
     report_metrics, report_summary = compute_report_metrics(tables, config)
     reconciliation = compute_reconciliation(tables, config)
+    stage_durations["reporting"] = round(time.perf_counter() - started, 4)
     audit.add(
         "REPORTING_COMPLETED",
         {
@@ -652,7 +654,7 @@ def persist_pipeline_run(
         written[group] = write_frame_set(
             run_directory / group, frames, formats=artifact_formats
         )
-    checksum_path = write_table_checksums(run_directory, run.tables)
+    write_table_checksums(run_directory, run.tables)
 
     table_frames = warehouse_tables(run)
     with Warehouse(db_path) as warehouse:
@@ -688,8 +690,8 @@ def persist_pipeline_run(
         "table_counts": warehouse_counts,
     }
     summary["artifacts"] = {
-        "run_directory": str(run_directory),
-        "checksums": str(checksum_path),
+        "run_directory": ".",
+        "checksums": "checksums.json",
         "groups": sorted(written),
     }
     summary_path = write_json(run_directory / "summary.json", summary)

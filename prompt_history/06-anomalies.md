@@ -2,7 +2,7 @@
 
 ## Context
 
-The clean pipeline validated successfully. The assessment required six specific anomaly classes, separate ground
+The clean pipeline validated successfully. The specification required six specific anomaly classes, separate ground
 truth, independent detection, and quantitative evaluation.
 
 ## Prompt

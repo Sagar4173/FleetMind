@@ -1,0 +1,207 @@
+{
+  "configurations": [
+    "baseline",
+    "larger"
+  ],
+  "environment": {
+    "cpu_count": 12,
+    "duckdb": "2.0.0",
+    "memory_gb": 7.28,
+    "numpy": "2.3.5",
+    "ortools": "9.15.6755",
+    "pandas": "2.3.3",
+    "pipeline_version": "1.0.0",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "pyarrow": "21.0.0",
+    "python": "3.13.9"
+  },
+  "measured_at": "2026-10-31T17:21:29.764644",
+  "repeats": 1,
+  "results": [
+    {
+      "artifacts": {
+        "manifest": "outputs\\benchmarks\\bench-RUN-A89FE8126581\\RUN-A89FE8126581\\manifest.json",
+        "run_directory": "outputs\\benchmarks\\bench-RUN-A89FE8126581\\RUN-A89FE8126581",
+        "warehouse": "outputs\\benchmarks\\bench-RUN-A89FE8126581\\benchmark.duckdb"
+      },
+      "benchmark_seconds": 520.5007,
+      "checksums": {
+        "clean": {
+          "customer_sites": "02491a9dcbbf600e633e42ff600c339994b260c524bf718d49c21a436d7fa30a",
+          "deliveries": "ba3ee89cb78a2ab54df6f540630ab1fdb14c464b46fbd8e7a1679ab5a22d5936",
+          "delivery_assignments": "ee3dc2c4b2d9f13233f13bda691e211a8ffd382c63af8883ee4722ac4c43d0cf",
+          "delivery_events": "2f33b2fd2d81bd6068f2b07fe6bb4ab8cc3e6c4849a9040e5bfd47d680cca8c6",
+          "delivery_outcomes": "b9cd4b69e2699e36766ae0e38aa35af47e16ea3db8c506073729e6eee47d0414",
+          "depots": "bb3d7ee6e2cf21f3ed69b8c65bcaea61ea1631d5222ba4eb20bb9354c4326bc6",
+          "driver_certifications": "1b1256132b28644a2cbe96c98cdb9ad45e7879f17f8530f261bfc5f75e0a4adf",
+          "drivers": "e8c3a5ef5e1df6f318b918ec8d9efbc985ff22b62b7d7ee09cd6f9ad8a2b8640",
+          "orders": "bd18abe2477b66c1dbd5162ed6cc2fafa95eba551eb4519d817804c725ae1137",
+          "route_events": "e3774cb0d8715bb977e047d8f0fa7023419df4c3778c0fef805a9eaac53456d9",
+          "route_legs": "444472530b9071ab2cbad324302b1b31076e88df1ed66205aa996689f61c49e0",
+          "route_stops": "274f4164e8955a329160ad531fcd92e32644d32b7f8becbadf86cf3500c3e311",
+          "routes": "d5e93d1a38487a703cb94cf0c325004318e9b8c9236481f7d8c0b12658d32e67",
+          "shifts": "9803efc45cb6ecd72ce5a9f1a29fd04693a53ee99c30274341e716cc6293e93b",
+          "solver_runs": "3e85a7e2e9e9d5be8908735cef315c3be3d6f157da3319e10ba3ac4cd8e65f7a",
+          "time_windows": "572d103fee464d2da5fc14e2404eeb0012634a140480a06d87693d67350f5c1c",
+          "travel_scenarios": "89c9a296630ec9bff21e82fe20a1e5078e323b73dcaf79a96d441456eaa1fb6b",
+          "travel_time_matrix": "5b75214acf880ca06fb013daa276dd2feeeefa689d9b2f17886a93a7e2c15811",
+          "vehicle_capacities": "d3e70a30aaeeba13ff0d3ea98f8532c44e9df45e3d21bdc19af1fa38bb6f0f62",
+          "vehicle_equipment": "57f01c05fc55e8788c1ec86849228a067af0ae3775b9ecd92be2d12c5489901f",
+          "vehicles": "5ba5242edfaa24533418294f8be71a22175b3196fb48754f4f61b0600fbed3c7"
+        }
+      },
+      "config": "baseline",
+      "config_file": "a89fe8126581590c231200d9362b39fb9c83875860d1cd0539d9a4e9d077ba39",
+      "config_name": "baseline",
+      "counts": {
+        "customer_sites": 500,
+        "deliveries": 2000,
+        "delivery_events": 10000,
+        "drivers": 100,
+        "orders": 2000,
+        "route_events": 8752,
+        "route_stops": 2000,
+        "routes": 296,
+        "shifts": 2143,
+        "travel_matrix_rows": 251001,
+        "vehicles": 100
+      },
+      "days": 30,
+      "error": "",
+      "memory": {
+        "peak_rss_mb": 445.89,
+        "python_tracemalloc_current_mb": 51.3,
+        "python_tracemalloc_peak_mb": 159.43,
+        "start_rss_mb": 114.46
+      },
+      "quality": {
+        "anomaly_detection_mean_f1": 1.0,
+        "anomaly_detection_min_f1": 1.0,
+        "assigned_deliveries": 2000,
+        "clean_issue_count": 0,
+        "clean_validation_passed": true,
+        "delivered_deliveries": 1991,
+        "on_time_rate": 1.0,
+        "route_count": 296,
+        "service_rate": 0.9955,
+        "unserved_deliveries": 0
+      },
+      "run_id": "RUN-A89FE8126581",
+      "seed": 20261022,
+      "solver_time_limit_seconds": 10,
+      "stages": {
+        "detect_anomalies": 0.6831,
+        "generate": 17.1607,
+        "inject_anomalies": 6.1443,
+        "measured_sum": 428.9704,
+        "orchestration": 518.3374,
+        "persist": 30.8179,
+        "plan": 311.5047,
+        "simulate": 5.1837,
+        "total": 518.3374,
+        "validate_clean": 28.9075,
+        "validate_dirty": 28.5685
+      },
+      "status": "SUCCEEDED",
+      "throughput": {
+        "deliveries_per_second": 3.858,
+        "diagnostics_rows_per_second": 538.051,
+        "solver_seconds": 311.3467,
+        "solver_seconds_per_day": 10.3782
+      }
+    },
+    {
+      "artifacts": {
+        "manifest": "outputs\\benchmarks\\bench-RUN-2155D9A8756A\\RUN-2155D9A8756A\\manifest.json",
+        "run_directory": "outputs\\benchmarks\\bench-RUN-2155D9A8756A\\RUN-2155D9A8756A",
+        "warehouse": "outputs\\benchmarks\\bench-RUN-2155D9A8756A\\benchmark.duckdb"
+      },
+      "benchmark_seconds": 957.8041,
+      "checksums": {
+        "clean": {
+          "customer_sites": "48d9011337ecf5df8e0120092fae441e86a9d71d3fe94301c63acfd99a4dd12d",
+          "deliveries": "cd84781cc2f36cec3caf48d868a1d4869a34a687906b1cea7dad6da275551693",
+          "delivery_assignments": "847456ec13e33cb06d704bcf3ab34d218c6f4920210d1abaceab9a3bd8ff7e83",
+          "delivery_events": "5678f77457fca6f6a637b887502e67a113995be8bcce1c63968efad162520700",
+          "delivery_outcomes": "d85661e0350a9a15ae7a61299c3caa2a4b6ddd45df793093277828e15f95df4e",
+          "depots": "c8c3bb1b52d80c412f8114150f493d10359d89e7e7b2ffec36811d1042c2be30",
+          "driver_certifications": "3adca8c6ed033fa2647ae38438f5f03cdab41875f0d54940afc639443c670979",
+          "drivers": "9eae298db0a20747ab1187ee4667641b8c61351905af5a1fe385ca8d2f3c5524",
+          "orders": "58ae9f74e1d652f5213d00b15defc23a1a9e38677e51b150346c26bb45d2f307",
+          "route_events": "a1ae17dd4b20877e46d62c4e2b8350bb964c66159171e6060a18150951f53576",
+          "route_legs": "c28826289af9d23128e5ca72c508badca566ba24cb6e66684204d5b93ef28aff",
+          "route_stops": "34f14e414a608b0c14ae799448c63b16ca56d05e5a3c2bac11f079b6fd4bacc1",
+          "routes": "91eee27c9d0165bd2377b2d10bd12c995019ed07493fbdf047e53fdf3b3ebf88",
+          "shifts": "d48ba6bfbae764da916ce0d5cab0b6994e16d1a283a8b81f00a2d9d699c7a793",
+          "solver_runs": "fb89041c4cca1c99e12dd8199d856c072b4af4873cc4d590a424bfa6e5a9263b",
+          "time_windows": "d4232452e80ead05ba63b50f12e6e9408b898737fc1eb6d438f56f7608f29743",
+          "travel_scenarios": "40691c675cb7f9f57c4e43b2b4bd9a3f2f882d670d1829f1b845db699de07219",
+          "travel_time_matrix": "d1a20386a53ed22e509c34fe9940ac78d061865b45a442b5e44ab1694518b703",
+          "vehicle_capacities": "c9ecbfb8ed069ee585bdde61ba4e9e455626d28c973d07fcbe44c7728425c316",
+          "vehicle_equipment": "c472bbb7ba10f46ad223d01b0d3b834f5176fd8aa65bfa2194f8b5ce82c01591",
+          "vehicles": "83154977974b923894cd8617151657a7f58fc5764eebd4c6de7a717a5eba0cb3"
+        }
+      },
+      "config": "larger",
+      "config_file": "2155d9a8756aaeea53d09e36459a8dad68d162d6c374322d0d7e1f62ac724555",
+      "config_name": "larger",
+      "counts": {
+        "customer_sites": 750,
+        "deliveries": 4000,
+        "delivery_events": 20000,
+        "drivers": 150,
+        "orders": 4000,
+        "route_events": 16977,
+        "route_stops": 4000,
+        "routes": 521,
+        "shifts": 3440,
+        "travel_matrix_rows": 564001,
+        "vehicles": 150
+      },
+      "days": 30,
+      "error": "",
+      "memory": {
+        "peak_rss_mb": 859.69,
+        "python_tracemalloc_current_mb": 106.82,
+        "python_tracemalloc_peak_mb": 345.19,
+        "start_rss_mb": 147.31
+      },
+      "quality": {
+        "anomaly_detection_mean_f1": 1.0,
+        "anomaly_detection_min_f1": 1.0,
+        "assigned_deliveries": 4000,
+        "clean_issue_count": 0,
+        "clean_validation_passed": true,
+        "delivered_deliveries": 3984,
+        "on_time_rate": 1.0,
+        "route_count": 521,
+        "service_rate": 0.996,
+        "unserved_deliveries": 0
+      },
+      "run_id": "RUN-2155D9A8756A",
+      "seed": 20261022,
+      "solver_time_limit_seconds": 15,
+      "stages": {
+        "detect_anomalies": 1.8017,
+        "generate": 37.7672,
+        "inject_anomalies": 13.1675,
+        "measured_sum": 752.2609,
+        "orchestration": 953.8474,
+        "persist": 62.1938,
+        "plan": 481.7474,
+        "simulate": 9.8521,
+        "total": 953.8474,
+        "validate_clean": 74.4587,
+        "validate_dirty": 71.2725
+      },
+      "status": "SUCCEEDED",
+      "throughput": {
+        "deliveries_per_second": 4.194,
+        "diagnostics_rows_per_second": 647.891,
+        "solver_seconds": 481.2655,
+        "solver_seconds_per_day": 16.0422
+      }
+    }
+  ]
+}

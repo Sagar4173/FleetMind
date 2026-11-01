@@ -9,6 +9,10 @@ The project is designed to be inspected end to end: every run is reproducible fr
 every artifact has a logical checksum, and every anomaly has a machine-readable ground-truth record that the detectors
 never see.
 
+All generated names, addresses, phone numbers, email addresses, coordinates, license plates, and identifiers are
+synthetic. The dataset is produced by seeded NumPy and Faker generators; it does not describe real people, companies,
+or locations.
+
 ## Contents
 
 - [What it demonstrates](#what-it-demonstrates)
@@ -23,6 +27,7 @@ never see.
 - [Tests](#tests)
 - [Documentation](#documentation)
 - [Assumptions and limitations](#assumptions-and-limitations)
+- [License](#license)
 
 ## What it demonstrates
 
@@ -106,8 +111,7 @@ Useful options for `run`:
 ```mermaid
 flowchart LR
     A[YAML config] --> B[Generate master data]
-    B --> C[Validate master]
-    C --> D[OR-Tools planning]
+    B --> D[Per-day OR-Tools planning]
     D --> E[Execution simulation]
     E --> F[Validate clean snapshot]
     F --> G[Reporting + reconciliation]
@@ -170,22 +174,25 @@ outputs/
 ```
 
 `summary.json` contains the KPI headline, count inventory, validation status, anomaly metrics, reconciliation result,
-stage timings, checksums, and warehouse table counts. `manifest.json` records the artifact inventory, row counts,
-column lists, logical checksums, and requested formats.
+stage timings, checksums, and warehouse table counts. `manifest.json` records every table group with row counts, column
+lists, logical checksums, and both Parquet and CSV paths relative to the run directory.
 
-A representative starter run is checked in under [`data/sample/starter-run`](data/sample/starter-run) (CSV and JSON
-only; the DuckDB file is intentionally not committed). It contains 25 routes, 118 assigned deliveries, 116 delivered,
-2 failed, 2 unserved, and all six anomaly types detected with F1 1.0.
+A complete representative starter run is checked in under
+[`data/sample/starter-run`](data/sample/starter-run): all 21 checksummed tables, Parquet and CSV artifacts, the
+pre-execution master snapshot, the final simulation snapshot, anomaly and quarantine evidence, `manifest.json`, and
+`checksums.json`. The DuckDB warehouse is intentionally not committed. It contains 25 routes, 118 assigned deliveries,
+116 delivered, 2 failed, 2 unserved, and all six anomaly types detected with F1 1.0. All names, addresses, contacts,
+and coordinates are synthetic.
 
 ## Configuration
 
-Configurations use YAML with an optional `extends` chain. `configs/baseline.yaml` is the assessment baseline:
+Configurations use YAML with an optional `extends` chain. `configs/baseline.yaml` is the required baseline:
 500 customer sites, 2,000 deliveries, 100 vehicles, 100 drivers, 30 days, seed `20261022`.
 
 | Config | Sites | Orders | Vehicles | Days | Solver limit/day | Purpose |
 |---|---:|---:|---:|---:|---:|---|
 | `starter.yaml` | 40 | 120 | 12 | 7 | 5 s | Fast local iteration and dashboard data |
-| `baseline.yaml` | 500 | 2,000 | 100 | 30 | 10 s | Required assessment scale |
+| `baseline.yaml` | 500 | 2,000 | 100 | 30 | 10 s | Required baseline scale |
 | `larger.yaml` | 750 | 4,000 | 150 | 30 | 15 s | Scale and memory headroom |
 
 The most important settings:
@@ -199,6 +206,10 @@ The most important settings:
 | `simulation` | variance, delay, failure rate | Deterministic execution variability. |
 | `anomaly` | `instances_per_type`, coordinate margin | Injection volume. |
 | `reporting` | `on_time_grace_minutes`, `top_n` | KPI definitions and ranked dimensions. |
+
+`generation.drivers` must be between 1 and `generation.vehicles`. The planner pairs one driver with one vehicle per
+shift and allows at most one shift per vehicle per date, so extra drivers would have no assignable vehicle. More
+vehicles than drivers is valid and leaves some vehicles idle.
 
 ## Anomaly detection
 
@@ -225,22 +236,25 @@ clean and corrupted worlds without losing either.
 
 The full benchmark report is checked in at
 [`outputs/benchmarks/benchmark_report.md`](outputs/benchmarks/benchmark_report.md). The outputs directory is normally
-ignored by Git; this report is force-added as evidence. Measurements were taken on 2026-10-31 on one Windows 11
+ignored by Git; this report is force-added as evidence. Measurements were taken on 2026-11-01 on one Windows 11
 machine with Python 3.13.9, 12 logical CPUs, 7.28 GB RAM, OR-Tools 9.15.6755, DuckDB 2.0.0, Pandas 2.3.3, and NumPy
-2.3.5. Each configuration was run cold once.
+2.3.5. Each configuration was measured once; the configurations ran sequentially in one process with no warm-up run.
+The 2026-10-31 pre-remediation report is preserved under `outputs/benchmarks/history/`.
 
-| Config | Sites | Orders | Vehicles | Days | Total (s) | Plan (s) | Peak RSS (MB) | Routes | Delivered | Service rate | F1 |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| baseline | 500 | 2,000 | 100 | 30 | 518.34 | 311.50 | 445.9 | 296 | 1,991 | 99.55% | 1.000 |
-| larger | 750 | 4,000 | 150 | 30 | 953.85 | 481.75 | 859.7 | 521 | 3,984 | 99.60% | 1.000 |
+| Config | Sites | Orders | Vehicles | Days | Total (s) | Planning (s) | Solver (s) | Solver s/day | Peak RSS (MB) | Routes | Delivered | Service rate | F1 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| baseline | 500 | 2,000 | 100 | 30 | 503.27 | 310.63 | 302.79 | 10.093 | 449.4 | 295 | 1,991 | 99.55% | 1.000 |
+| larger | 750 | 4,000 | 150 | 30 | 886.07 | 481.11 | 457.65 | 15.255 | 865.5 | 521 | 3,984 | 99.60% | 1.000 |
 
-Both benchmark runs passed clean validation with zero issues, served every requested delivery (0 unserved), and
-detected every injected anomaly with perfect precision and recall. Solver wall time was 311.35 s / 30 days
-(10.38 s per day) for baseline and 481.27 s / 30 days (16.04 s per day) for larger.
+Both benchmark runs passed clean validation with zero issues, assigned every requested delivery (0 unserved), and
+detected every injected anomaly with perfect precision and recall. `planning_seconds` covers deterministic pre-checks,
+per-day model construction, OR-Tools search, and result assembly. `solver_seconds` is the sum of the per-day
+`solver_runs.solve_seconds` values actually persisted by the planner, and `solver_seconds_per_day` normalizes that by
+the 30-day horizon.
 
 Benchmark totals include artifact persistence (Parquet + CSV), DuckDB writes, both validation passes, injection,
-detection, and reporting. They are not solver-only timings. The stage-level breakdown and the measurement method are
-in [`docs/benchmark_methodology.md`](docs/benchmark_methodology.md).
+detection, and reporting. They are not solver-only timings. The stage-level breakdown, finalization/unattributed
+timing split, and measurement method are in [`docs/benchmark_methodology.md`](docs/benchmark_methodology.md).
 
 ## Dashboard
 
@@ -256,8 +270,10 @@ The Streamlit app opens on port 8501 by default. It selects the latest run from 
 4. **Data quality** — clean/dirty issue counts by type and severity, quarantine records.
 5. **Anomalies** — ground truth vs. detections, per-type precision/recall/F1, and detection details.
 
-The dashboard is read-only; it never writes to the warehouse. Set `FLEETMIND_DB` to override the default database path,
-or pass `--database` to the CLI launcher. The standalone wrapper is `dashboard/app.py`.
+The dashboard is read-only; it never writes to the warehouse. It is intended for localhost use only: Streamlit binds
+to localhost by default and the app has no authentication or per-user authorization. Do not expose it on a public
+interface or point it at an untrusted database path. Set `FLEETMIND_DB` to override the default database path, or pass
+`--database` to the CLI launcher. The standalone wrapper is `dashboard/app.py`.
 
 ## Tests
 
@@ -269,8 +285,8 @@ python -m pytest -q -m "not slow"
 The suite covers deterministic generation, ID sequencing, geography and travel modelling, configuration merging and
 validation, routing constraints, simulation behaviour, all six anomaly injectors and detectors, quarantine, warehouse
 idempotency and rollback, reporting reconciliation, CLI behavior, dashboard data helpers, Streamlit smoke tests, and
-the measured benchmark writer. `tests/integration` uses a tiny 12-site configuration so the full pipeline runs in
-seconds without mocking OR-Tools.
+the measured benchmark writer. `tests/integration` uses small tiny configurations (8-12 sites) so the full pipeline
+runs in seconds without mocking OR-Tools.
 
 Latest verification is recorded in the final commit history and in [`docs/verification.md`](docs/verification.md).
 
@@ -293,8 +309,16 @@ Latest verification is recorded in the final commit history and in [`docs/verifi
   feed.
 - One depot, one region, and one daily planning horizon per service date. Multi-depot and multi-day route continuity
   are out of scope.
-- The benchmark is a single cold run per configuration, not a statistical distribution. Absolute timings depend on
+- The benchmark is a single measured run per configuration, not a statistical distribution. Absolute timings depend on
   hardware and solver search behavior.
 - Anomaly detection is rule-based and evaluated on exactly the six injected classes; it is not a general-purpose
   anomaly classifier.
 - The dashboard requires a warehouse produced by `fleetmind run` and intentionally fails gracefully when none exists.
+- Credential and effective-date expiry fields are generated and stored, but planning does not filter candidates by
+  expiry. Generated credentials remain valid across the provided 7- and 30-day horizons; expiry-aware eligibility is
+  out of scope.
+- All data is synthetic. No real customer, driver, vehicle, or location records are included.
+
+## License
+
+FleetMind is released under the [MIT License](LICENSE).

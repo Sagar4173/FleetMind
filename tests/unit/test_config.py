@@ -75,6 +75,27 @@ def test_mix_must_sum_to_one() -> None:
         )
 
 
+@pytest.mark.parametrize("vehicles,drivers", [(1, 3), (2, 4)])
+def test_more_drivers_than_vehicles_is_rejected_at_configuration(
+    vehicles: int, drivers: int
+) -> None:
+    with pytest.raises(ValidationError, match="drivers cannot exceed vehicles"):
+        AppConfig.model_validate(
+            {"generation": {"vehicles": vehicles, "drivers": drivers}}
+        )
+
+
+@pytest.mark.parametrize("vehicles,drivers", [(3, 3), (4, 2), (4, 1)])
+def test_supported_driver_vehicle_ratios_validate(
+    vehicles: int, drivers: int
+) -> None:
+    config = AppConfig.model_validate(
+        {"generation": {"vehicles": vehicles, "drivers": drivers}}
+    )
+    assert config.generation.vehicles == vehicles
+    assert config.generation.drivers == drivers
+
+
 def test_generation_mix_defaults_cover_every_priority() -> None:
     config = load_config("configs/baseline.yaml")
     assert sum(config.generation.priority_mix.values()) == pytest.approx(1.0)
