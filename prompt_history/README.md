@@ -49,9 +49,9 @@ The main session contains the build prompt and every later audit/remediation ins
 The extraction cutoff is the last captured prompt at 2026-11-01T12:12:05Z. Prompts added to the local database after that
 cutoff are not part of this record.
 
-The two auxiliary sessions contain the 460-character OpenCode context7 MCP failure notice and one
-`continue`; they are not part of the FleetMind engineering conversation but are included so the record is
-complete for this working directory.
+The two auxiliary sessions each contain the same 460-character OpenCode context7 MCP failure notice; the
+first also contains one `continue`. They are not part of the FleetMind engineering conversation but are
+included so the record is complete for this working directory.
 
 ## What is not covered
 
