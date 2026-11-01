@@ -91,7 +91,7 @@ python -m fleetmind info --config starter
 | `fleetmind schema --show` | Print the generated warehouse DDL. |
 | `fleetmind schema --output schema.sql` | Export the generated DDL. |
 | `fleetmind dashboard --database outputs/fleetmind.duckdb` | Launch the read-only Streamlit dashboard. |
-| `fleetmind benchmark --configs baseline,larger` | Measure cold pipeline runs and write JSON + Markdown reports. |
+| `fleetmind benchmark --configs baseline,larger` | Measure end-to-end pipeline runs and write JSON + Markdown reports. |
 
 `python -m fleetmind ...` and the installed `fleetmind ...` entry point are equivalent. Bare configuration names
 resolve to `configs/<name>.yaml`; explicit relative or absolute paths are also accepted.
@@ -236,7 +236,7 @@ clean and corrupted worlds without losing either.
 
 The full benchmark report is checked in at
 [`outputs/benchmarks/benchmark_report.md`](outputs/benchmarks/benchmark_report.md). The outputs directory is normally
-ignored by Git; this report is force-added as evidence. Measurements were taken on 2026-11-01 on one Windows 11
+ignored by Git; this report is explicitly unignored as evidence. Measurements were taken on 2026-11-01 on one Windows 11
 machine with Python 3.13.9, 12 logical CPUs, 7.28 GB RAM, OR-Tools 9.15.6755, DuckDB 2.0.0, Pandas 2.3.3, and NumPy
 2.3.5. Each configuration was measured once; the configurations ran sequentially in one process with no warm-up run.
 The 2026-10-31 pre-remediation report is preserved under `outputs/benchmarks/history/`.
