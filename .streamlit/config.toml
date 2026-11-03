@@ -9,3 +9,27 @@ headless = true
 
 [browser]
 gatherUsageStats = false
+
+# Dark command-center theme. These values mirror the design tokens in
+# src/fleetmind/dashboard/ui.py so native Streamlit widgets, charts and
+# custom cards share one visual system.
+[theme]
+base = "dark"
+primaryColor = "#4f8cff"
+backgroundColor = "#0b1220"
+secondaryBackgroundColor = "#0f1828"
+textColor = "#e6edf7"
+linkColor = "#7fb0ff"
+font = "'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+headingFont = "'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+codeFont = "'Cascadia Code', Consolas, monospace"
+baseFontSize = 14
+baseRadius = "0.625rem"
+buttonRadius = "0.5rem"
+borderColor = "#22314a"
+codeBackgroundColor = "#0c1624"
+dataframeHeaderBackgroundColor = "#111d30"
+metricValueFontSize = "1.8rem"
+metricValueFontWeight = 600
+showWidgetBorder = true
+showSidebarBorder = true
